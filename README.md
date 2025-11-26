@@ -42,7 +42,3 @@ The objective of this project is to develop an automated system for parking mana
 - Simulation of time (possibly to communicate the opening/closing of the parking lot) by a dedicated wheel/input from the dashboard
 - A view of free and occupied parking lots:
     - This requires to know which lot is the car parking onto, maybe via small detection sensors installed under each parking lot
-
-### Introduction
-
-### Introduction
