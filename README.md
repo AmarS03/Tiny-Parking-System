@@ -49,18 +49,18 @@ Our work is based on everything we have learned in the last 3 years, but most im
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Opening;
-    Opening --> Waiting;
-    state Waiting <<fork>>;
-    Waiting --> Incoming_car;
-    Waiting --> Outgoing_car;
-    Incoming_car --> Open_gate: Parking available;
-    Incoming_car --> Refuse_entry: No parking available;
-    state Closing <<join>>;
-    Open_gate --> Update_status;
-    Update_status --> Closing;
-    Outgoing_car --> Closing;
-    Closing --> [*];
+    [*] --> Opening
+    Opening --> Waiting
+    state Waiting <<fork>>
+    Waiting --> Incoming_car
+    Waiting --> Outgoing_car
+    Incoming_car --> Open_gate: Parking available
+    Incoming_car --> Refuse_entry: No parking available
+    state Closing <<join>>
+    Open_gate --> Update_status
+    Update_status --> Closing
+    Outgoing_car --> Closing
+    Closing --> [*]
 ```
 
 ### General features
