@@ -48,7 +48,7 @@ Our work is based on everything we have learned in the last 3 years, but most im
 ## How it works
 
 ```mermaid
-stateDiagram-v2;
+stateDiagram-v2
     [*] --> Opening;
     Opening --> Waiting;
     state Waiting <<fork>>;
