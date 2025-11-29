@@ -1,0 +1,45 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+###############################################
+# CCS / TI Code Composer Studio (MSP432)
+###############################################
+
+# Build output
+Debug/
+Release/
+*/Debug/
+*/Release/
+
+# CCS auto-generated files
+*.map
+*.out
+*.obj
+*.d
+*.bin
+*.hex
+*.asm
+*.lst
+*.mk
+*.dep
+
+# Project metadata (recreated by CCS)
+/.metadata/
+/.jxbrowser.userdata/
+*.project
+*.cproject
+.settings/
+.makefile
+.subdir_vars.mk
+.subdir_rules.mk
+
+# CCS-specific generated files
+ccsObjs.opt
+ccs*log.txt
