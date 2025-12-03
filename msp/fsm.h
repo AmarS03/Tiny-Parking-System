@@ -14,7 +14,11 @@
 #define FSM_H_
 
 typedef enum {
-
+    WEIGHT_DETECTED,
+    EXIT_DETECTED,
+    REMOTE_OPEN,
+    CV_RECOGNITION,
+    NONE
 } Event_t;
 
 typedef enum {
@@ -33,6 +37,25 @@ typedef struct {
     State_t state;
     void (*state_function)(void);
 } Fsm_t;
+
+
+//////////////////////////////////////////////////////////
+///////////// Functions //////////////////////////////////
+//////////////////////////////////////////////////////////
+
+void init_fn();
+
+void idle_fn();
+
+void entry_fn();
+
+void refuse_fn();
+
+void allow_fn();
+
+void exit_fn();
+
+void closed_fn();
 
 
 #endif /* FSM_H_ */
