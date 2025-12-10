@@ -1,3 +1,4 @@
+import { SensorStatusCard } from '@/components/dashboard/SensorStatusCard';
 import { ParkingLotCard } from '@/components/dashboard/ParkingLotCard';
 import { BarrierControlCard } from '@/components/dashboard/BarrierControlCard';
 import { ActivityLogCard } from '@/components/dashboard/ActivityLogCard';
@@ -19,6 +20,9 @@ export default function Home() {
         <main className="grid grid-cols-1 lg:grid-cols-4 gap-6 max-w-[1600px] mx-auto">
           {/* Left Column: Sensors & Controls */}
           <div className="lg:col-span-1 space-y-6 flex flex-col">
+            <div className="flex-none">
+              <SensorStatusCard />
+            </div>
             <div className="flex-none">
               <BarrierControlCard />
             </div>
