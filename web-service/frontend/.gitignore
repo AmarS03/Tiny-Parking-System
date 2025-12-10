@@ -1,7 +1,5 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-/components/dashboard/ActivityLogCard.tsx
 /components/dashboard/SensorStatusCard.tsx
-/components/dashboard/BarrierControlCard.tsx
 
 # dependencies
 /node_modules
