@@ -108,6 +108,17 @@ stateDiagram-v2
 ## Requirements
 
 
+### Configuration
+- First, download the ESP-IDF framework. A complete guide can be found [here](https://docs.espressif.com/projects/esp-idf/en/v5.5.2/esp32s3/get-started/index.html).
+- Run the following commands:
+  ```bash
+    idf.py set-target esp32s3
+    idf.py fullclean
+    idf.py menuconfig 
+  ```
+  Once landed in the configuration menu, enable the following options:
+  - Enable PSRAM (through Component config) and set     Octal Mode, 80 MHz frequency
+
 ## Known issues and possible improvements
 
 
