@@ -171,3 +171,24 @@ void app_main(void)
 }
 
 #endif
+
+void app_main(void)
+{
+    while (1) {
+        if (curr_state < STATES_NUM) {
+            fsm[curr_state].state_function();
+
+            /**
+             * Transition logic (simplified for illustration)
+             * TODO: Implement proper event detection and state transition logic
+             */
+            if (curr_state == INIT) {
+                curr_state = IDLE;
+            }
+
+        } else {
+            ESP_LOGE("FSM", "Invalid state: %d", curr_state);
+            break;
+        }
+    }
+}

@@ -1,14 +1,18 @@
 /**
  * @file init.c
  * 
- * This file cointains the main initialization
+ * This file contains the main initialization
  * functions for the hardware peripherals
  * and the overall components of the system
  */
 
 
 #include "init.h"
+#include "wifi.h"
+
 #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "esp_system.h"
 #include "esp_camera.h"
 #include "esp_psram.h"
@@ -40,7 +44,7 @@
 void hw_init()
 {
     camera_init();
-    ultrasonic_init();
+    ultrasonic_sensor_init();
     weight_sensor_init();
 }
 
@@ -89,7 +93,7 @@ void camera_init()
 
 }
 
-void ultrasonic_init()
+void ultrasonic_sensor_init()
 {
     const char *TAG = "ULTRASONIC_INIT";
     static ultrasonic_sensor_t config = {
@@ -97,7 +101,7 @@ void ultrasonic_init()
         .echo_pin = ECHO_GPIO
     };
 
-    ESP_ERROR_CHECK(ultrasonic_init_sensor(&config));
+    ESP_ERROR_CHECK(ultrasonic_init(&config));
 
     ESP_LOGI(TAG, "Ultrasonic sensor initialized successfully");
 }
@@ -108,5 +112,12 @@ void weight_sensor_init()
 
 void wifi_init()
 {
-    
+    wifi_init_service();
+
+    while (!wifi_is_connected()) {
+        ESP_LOGI("WIFI_INIT", "Waiting for WiFi connection...");
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
+
+    ESP_LOGI("WIFI_INIT", "WiFi connected successfully");
 }
