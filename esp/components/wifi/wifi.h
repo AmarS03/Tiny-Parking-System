@@ -1,7 +1,7 @@
 /**
  * @file wifi.h
  * 
- * WiFi initialization header file
+ * Header file for WiFi service interface
  * 
  */
 #ifndef WIFI_H
