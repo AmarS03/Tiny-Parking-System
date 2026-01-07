@@ -1,0 +1,21 @@
+menu "Project Configuration"
+    config USE_MOCK_CAMERA
+        bool "Use mock camera (for Wokwi simulation)"
+        default n
+        help
+            Enable this for Wokwi simulation without real camera.
+            
+    config WIFI_SSID
+        string "WiFi SSID"
+        default "Wokwi-GUEST" if USE_MOCK_CAMERA
+        default "mywifi"
+
+    config WIFI_PASSWORD
+        string "WiFi Password"
+        default "" if USE_MOCK_CAMERA
+        default "mypassword"
+        
+    config API_KEY
+        string "CircuitDigest API Key"
+        default "your_api_key_here"
+endmenu
