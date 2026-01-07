@@ -9,6 +9,7 @@
  */
 
 #include "fsm.h"
+#include "init.h"
 
 
 /**
@@ -16,8 +17,9 @@
  * components
  */
 void init_fn() {
-    //hw_init();
-    //other initialization
+    hw_init();
+    //other initializations
+    wifi_init();
 }
 
 
