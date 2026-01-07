@@ -1,7 +1,6 @@
 dependencies:
   esp-idf-lib/esp_idf_lib_helpers:
-    component_hash: 
-      689853bb8993434f9556af0f2816e808bf77b5d22100144b21f3519993daf237
+    component_hash: 689853bb8993434f9556af0f2816e808bf77b5d22100144b21f3519993daf237
     dependencies: []
     source:
       registry_url: https://components.espressif.com
@@ -41,8 +40,7 @@ dependencies:
     - esp32s3
     version: 1.1.0
   esp-idf-lib/ultrasonic:
-    component_hash: 
-      da9c0899db56f6a994090e6d8257dc11a2daae241cf9368da7d06b95b7d0ee72
+    component_hash: da9c0899db56f6a994090e6d8257dc11a2daae241cf9368da7d06b95b7d0ee72
     dependencies:
     - name: esp-idf-lib/esp_idf_lib_helpers
       registry_url: https://components.espressif.com
@@ -64,8 +62,7 @@ dependencies:
     - esp32s3
     version: 1.1.0
   espressif/esp32-camera:
-    component_hash: 
-      f0a608b109935a5389221eee5090ec61f51b0df1a0749531fe59d33aaf263233
+    component_hash: f0a608b109935a5389221eee5090ec61f51b0df1a0749531fe59d33aaf263233
     dependencies:
     - name: espressif/esp_jpeg
       registry_url: https://components.espressif.com
@@ -79,8 +76,7 @@ dependencies:
       type: service
     version: 2.1.4
   espressif/esp_jpeg:
-    component_hash: 
-      defb83669293cbf86d0fa86b475ba5517aceed04ed70db435388c151ab37b5d7
+    component_hash: defb83669293cbf86d0fa86b475ba5517aceed04ed70db435388c151ab37b5d7
     dependencies:
     - name: idf
       require: private
@@ -92,7 +88,7 @@ dependencies:
   idf:
     source:
       type: idf
-    version: 5.5.2
+    version: 5.5.1
 direct_dependencies:
 - esp-idf-lib/hx711
 - esp-idf-lib/ultrasonic

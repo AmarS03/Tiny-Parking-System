@@ -99,7 +99,10 @@ Our work is based on everything we have learned in the last 3 years, but most im
 ```
 Tiny-Parking-System
 ├── esp/
-│   ├── main/             
+|   ├── components/           # Custom project components
+|   |   ├── weight/           
+|   |   └── wifi/
+│   ├── main/                 # Main application files
 │   └── diagram.json          # Wokwi diagram components
 └── web-service/
     ├── api
@@ -113,7 +116,7 @@ Tiny-Parking-System
         ├── public/
         └── package.json      # React and Next.js dependencies
 ```
-
+The project follows a service oriented architecture: it uses the component manager provided by ESP-IDF to interact with external driver libraries, which are included in  [idf_component.yml](esp/main/idf_component.yml), and exploits the build system to integrate the developed [components](esp/components/) via CMake. These approach guarantees scalability and modularity for future development.
 ### API model:
 
 - **`/status`**:
@@ -171,8 +174,9 @@ Before getting started, ensure that you have the following installed:
   ```
 - Once landed in the configuration menu, enable the following options:
   - Enable ESP PSRAM (through Component config)
-  - Enable Octal Flash (through Serial Flasher config)
-  - Set Flash SPI speed to 80 MHz
+    - Enable Octal Flash and set clock speed to 80 MHz
+  - Set the correct flash size (usually 8 MB) and make sure that the SPI speed matches the one of the PSRAM (through Serial flasher config)
+  - Set the WiFi SSID and password (these will be locally stored in the configuration file)
 
 ### 4. Setting up the Web Service
 - Add the environment keys:
@@ -185,6 +189,13 @@ Before getting started, ensure that you have the following installed:
   - `npm run build`
   - `npm run dev`
 
+## Run the project
+- Once everything is setup properly simply run the following command:
+    ```bash
+    idf.py set-target esp32s3
+    idf.py fullclean
+    idf.py menuconfig 
+    ```
 
 ## Known issues and possible improvements
 
