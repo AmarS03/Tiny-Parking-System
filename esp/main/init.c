@@ -25,7 +25,7 @@
 #define ECHO_GPIO   GPIO_NUM_41
 
 // Camera pin definitions
-#define CAM_PWDN 38
+#define CAM_PWDN GPIO_NUM_38
 #define CAM_RESET -1   //software reset will be performed
 #define CAM_VSYNC GPIO_NUM_6
 #define CAM_HREF GPIO_NUM_7

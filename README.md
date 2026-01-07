@@ -192,11 +192,9 @@ Before getting started, ensure that you have the following installed:
 ## Run the project
 - Once everything is setup properly simply run the following command:
     ```bash
-    idf.py set-target esp32s3
-    idf.py fullclean
-    idf.py menuconfig 
+    idf.py build flash monitor 
     ```
-
+- TODO: add instructions to simulate system on wokwi
 ## Known issues and possible improvements
 
 1. Two or more vehicles cannot enter and exit the parking lot simultaneously. This does not obviously reflect real life parking lots, where we have two separate lanes. The reason is simply the budget limitation to buy double the amount of equipment (barriers, motors, weight sensors, ultrasound sensors...), just to resolve this small issue. So we simply imposed that one vehicle can only enter or exit at a time.

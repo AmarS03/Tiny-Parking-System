@@ -48,7 +48,7 @@ static int32_t weight_compute_offset(size_t samples)
 
     for (size_t i = 0; i < samples; i++) {
 
-        ESP_ERROR_CHECK(hx711_wait(&config, 1000));
+        ESP_ERROR_CHECK(hx711_wait(&config, 5000));
 
         ESP_ERROR_CHECK(hx711_read_data(&config, &raw));
 
