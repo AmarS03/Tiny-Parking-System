@@ -1,5 +1,5 @@
 /**
- * init.h
+ * @file init.h
  * 
  * Initilization functions header file
  * 
@@ -14,7 +14,7 @@ void hw_init();
 
 void camera_init();
 
-void ultrasonic_init();
+void ultrasonic_sensor_init();
 
 void weight_sensor_init();
 

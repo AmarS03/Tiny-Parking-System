@@ -11,6 +11,7 @@
 #include "fsm.h"
 #include "init.h"
 
+#include "esp_sleep.h"
 
 /**
  * Initializes hardware and other software
@@ -28,7 +29,8 @@ void init_fn() {
  * power mode and waits for interrupts
  */
 void idle_fn() {
-
+    //wait for event
+    esp_light_sleep_start();
 }
 
 /**
