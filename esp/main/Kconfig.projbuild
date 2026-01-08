@@ -1,25 +1,55 @@
 menu "Project Configuration"
+
     config USE_MOCK_CAMERA
         bool "Use mock camera (for Wokwi simulation)"
         default n
         help
-            Enable this for Wokwi simulation without real camera.
-            
-    config WIFI_SSID
-        string "WiFi SSID"
-        default "Wokwi-GUEST" if USE_MOCK_CAMERA
+            Enable this for Wokwi simulation:
+            - Uses mock camera
+            - Sets WiFi to Wokwi-GUEST
+            - Disables PSRAM (required for Wokwi)
+
+    #
+    # WiFi configuration (real hardware)
+    #
+    config WIFI_SSID_REAL
+        string "WiFi SSID (real hardware)"
         default "mywifi"
+        depends on !USE_MOCK_CAMERA
+
+    config WIFI_PASSWORD_REAL
+        string "WiFi Password (real hardware)"
+        default "mypassword"
+        depends on !USE_MOCK_CAMERA
+
+    #
+    # Effective WiFi configuration (derived)
+    #
+    config WIFI_SSID
+        string
+        default "Wokwi-GUEST" if USE_MOCK_CAMERA
+        default WIFI_SSID_REAL
 
     config WIFI_PASSWORD
-        string "WiFi Password"
+        string
         default "" if USE_MOCK_CAMERA
-        default "mypassword"
-        
+        default WIFI_PASSWORD_REAL
+
+    #
+    # API key (always user-defined)
+    #
     config API_KEY
         string "CircuitDigest API Key"
         default "your_api_key_here"
 
-    config ESP_MAXIMUM_RETRY
+    #
+    # PSRAM control for simulation
+    #
+    config DISABLE_PSRAM_FOR_WOKWI
+        bool
+        default y if USE_MOCK_CAMERA
+
+    config WIFI_MAXIMUM_RETRY
         int "Maximum retry"
         default 5
         help
