@@ -18,6 +18,23 @@
 #ifndef CONFIG_USE_MOCK_CAMERA
 #include "esp_camera.h"
 #endif
+#include "fsm.h"
+
+//variables
+Event_t event = NONE;
+
+State_t curr_state = INIT;
+
+Fsm_t fsm[] = {
+               {INIT, init_fn},
+               {IDLE, idle_fn},
+               {VEHICLE_ENTRY, entry_fn},
+               {ENTRY_REFUSED, refuse_fn},
+               {ENTRY_ALLOWED, allow_fn},
+               {VEHICLE_EXIT, exit_fn},
+               {CLOSED, closed_fn}
+};
+
 
 #define TRIG_GPIO   GPIO_NUM_5
 #define ECHO_GPIO   GPIO_NUM_18
@@ -412,3 +429,27 @@ void app_main(void) {
       vTaskDelay(pdMS_TO_TICKS(200));
     }
 }
+#endif
+
+
+
+// void app_main(void)
+// {
+//     while (1) {
+//         if (curr_state < STATES_NUM) {
+//             fsm[curr_state].state_function();
+
+//             /**
+//              * Transition logic (simplified for illustration)
+//              * TODO: Implement proper event detection and state transition logic
+//              */
+//             if (curr_state == INIT) {
+//                 curr_state = IDLE;
+//             }
+
+//         } else {
+//             ESP_LOGE("FSM", "Invalid state: %d", curr_state);
+//             break;
+//         }
+//     }
+// }

@@ -18,4 +18,11 @@ menu "Project Configuration"
     config API_KEY
         string "CircuitDigest API Key"
         default "your_api_key_here"
+
+    config ESP_MAXIMUM_RETRY
+        int "Maximum retry"
+        default 5
+        help
+            Set the Maximum retry to avoid station reconnecting to the AP unlimited when the AP is really inexistent.
+
 endmenu
