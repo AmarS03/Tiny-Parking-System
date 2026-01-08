@@ -1,17 +1,28 @@
-menu "WiFi Configuration"
+menu "Project Configuration"
+    config USE_MOCK_CAMERA
+        bool "Use mock camera (for Wokwi simulation)"
+        default n
+        help
+            Enable this for Wokwi simulation without real camera.
+            
+    config WIFI_SSID
+        string "WiFi SSID"
+        default "Wokwi-GUEST" if USE_MOCK_CAMERA
+        default "mywifi"
 
-config ESP_WIFI_SSID
-    string "WiFi SSID"
-    default ""
+    config WIFI_PASSWORD
+        string "WiFi Password"
+        default "" if USE_MOCK_CAMERA
+        default "mypassword"
+        
+    config API_KEY
+        string "CircuitDigest API Key"
+        default "your_api_key_here"
 
-config ESP_WIFI_PASSWORD
-    string "WiFi Password"
-    default ""
-
-config ESP_MAXIMUM_RETRY
-    int "Maximum retry"
-    default 5
-    help
-        Set the Maximum retry to avoid station reconnecting to the AP unlimited when the AP is really inexistent.
+    config ESP_MAXIMUM_RETRY
+        int "Maximum retry"
+        default 5
+        help
+            Set the Maximum retry to avoid station reconnecting to the AP unlimited when the AP is really inexistent.
 
 endmenu
