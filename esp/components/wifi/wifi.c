@@ -22,9 +22,9 @@
 #include "lwip/sys.h"
 
 /* WiFi configuration variables*/
-#define WIFI_SSD      CONFIG_ESP_WIFI_SSID
-#define WIFI_PASS      CONFIG_ESP_WIFI_PASSWORD
-#define MAXIMUM_RETRY  CONFIG_ESP_MAXIMUM_RETRY
+#define WIFI_SSD      CONFIG_WIFI_SSID
+#define WIFI_PASS      CONFIG_WIFI_PASSWORD
+#define MAXIMUM_RETRY  CONFIG_WIFI_MAXIMUM_RETRY
 
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t s_wifi_event_group;
@@ -99,7 +99,12 @@ void wifi_init_service(void)
         .sta = {
             .ssid = WIFI_SSD,
             .password = WIFI_PASS,
-            .threshold.authmode = WIFI_AUTH_WPA2_PSK
+            #ifdef CONFIG_USE_MOCK_CAMERA
+                .channel = 6, // Fixed channel for mock camera testing
+                .bssid_set = false,
+            #elif
+                .threshold.authmode = WIFI_AUTH_WPA2_PSK,
+            #endif
         },
     };
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );

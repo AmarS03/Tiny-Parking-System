@@ -194,7 +194,14 @@ Before getting started, ensure that you have the following installed:
     ```bash
     idf.py build flash monitor 
     ```
-- TODO: add instructions to simulate system on wokwi
+
+## Wokwi Simulation
+- The project also offers the possibility to test the whole system without having any additional hardware, thanks to the integration with [Wokwi](https://wokwi.com/). This allows the user to prototype and test fast and remotely.
+- In order to run the simulation successfully:
+  - Go back to the configuration menu
+  - Make sure to disable PSRAM, otherwise Wokwi will abort the process
+  - Go to Project Configuration and enable the mock camera option. This will automatically set the SSID and password to run the example in Wokwi, which uses a pre-fetched mock image to test the CV algorithm.
+
 ## Known issues and possible improvements
 
 1. Two or more vehicles cannot enter and exit the parking lot simultaneously. This does not obviously reflect real life parking lots, where we have two separate lanes. The reason is simply the budget limitation to buy double the amount of equipment (barriers, motors, weight sensors, ultrasound sensors...), just to resolve this small issue. So we simply imposed that one vehicle can only enter or exit at a time.

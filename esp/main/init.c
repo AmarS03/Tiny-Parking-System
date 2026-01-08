@@ -15,14 +15,12 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
-#include "esp_camera.h"
-#include "esp_psram.h"
 #include <esp_idf_lib_helpers.h>
 #include "ultrasonic.h"
 
-// Ultrasonic sensor pin definitions
-#define TRIG_GPIO   GPIO_NUM_42
-#define ECHO_GPIO   GPIO_NUM_41
+#ifndef CONFIG_USE_MOCK_CAMERA
+#include "esp_camera.h"
+#include "esp_psram.h"
 
 // Camera pin definitions
 #define CAM_PWDN GPIO_NUM_38
@@ -41,15 +39,23 @@
 #define CAM_D5 GPIO_NUM_18
 #define CAM_D6 GPIO_NUM_17
 #define CAM_D7 GPIO_NUM_16
+#endif
+
+// Ultrasonic sensor pin definitions
+#define TRIG_GPIO   GPIO_NUM_42
+#define ECHO_GPIO   GPIO_NUM_41
 
 
 void hw_init()
 {
+    #ifndef CONFIG_USE_MOCK_CAMERA
     camera_init();
+    #endif
     ultrasonic_sensor_init();
     weight_sensor_init();
 }
 
+#ifndef CONFIG_USE_MOCK_CAMERA
 void camera_init()
 {
     const char *TAG = "CAM_INIT";
@@ -94,6 +100,7 @@ void camera_init()
     ESP_LOGI(TAG, "Camera initialized successfully");
 
 }
+#endif
 
 void ultrasonic_sensor_init()
 {
