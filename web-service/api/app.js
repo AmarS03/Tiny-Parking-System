@@ -18,6 +18,13 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message || 'Unhandled API error' })
 });
 
-app.listen(port, () => {
-  console.log(`Tiny Parking System API: listening on port ${port}`)
-});
+module.exports = app;
+
+// If deployed locally, then start the server
+if (require.main === module) {
+  const port = process.env.PORT || 5000;
+
+  app.listen(port, () => {
+    console.log(`Tiny Parking System API: listening on port ${port}`)
+  });
+}
