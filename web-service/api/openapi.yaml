@@ -1,0 +1,124 @@
+openapi: "3.0.0"
+info:
+  title: "Tiny Parking System API"
+  version: "1.0.0"
+  description: "API for the Tiny Parking System project for the Embedded Software for the Internet of Things course - 2025/2026"
+servers:
+# TO-DO: update URL with Vercel deployment
+  - url: "/"
+paths:
+  /status:
+    get:
+      summary: "Returns the status of the ESP microcontroller, the parking info and its sensors"
+      responses:
+        '200':
+          description: "Current system status"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/systemStatus'
+    put:
+      summary: "Updates or initializes the status of the ESP microcontroller, the parking info and its sensors"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/systemStatus'
+      responses:
+        '200':
+          description: "System status updated/initialized successfully"
+                
+  /entry:
+    post:
+      summary: "Records a vehicle entering the parking system and returns an entryID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/entryRequest'
+      responses:
+        '200':
+          description: "Entry attempt recorded successfully"
+          content: 
+            application/json:
+              schema:
+                type: number
+                description: "ID of the recorded entry attempt"
+                
+  /entry/{entryID}:
+    get:
+      summary: "Records the result of a specific parking entry request (allowed/denied)"
+      parameters:
+        - name: entryID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "Entry result recorded successfully"
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/entryResponse'
+        '404':
+          description: "Not found: invalid entryID"
+
+components:
+  schemas:
+    systemStatus:
+      type: object
+      properties:
+        boardStatus:
+          $ref: '#/components/schemas/boardStatus'
+        parkingSpots:
+          type: integer
+        openingTime:
+          type: string
+        closingTime:
+          type: string
+          
+    boardStatus:
+      type: object
+      properties:
+        espStatus:
+          type: object
+        wifiModuleStatus:
+          type: object
+        weightSensorStatus:
+          type: object
+        ultrasonicSensorStatus:
+          type: object
+        barrierStatus:
+          type: object
+        displayStatus:
+          type: object
+
+    entryRequest:
+      type: object
+      properties:
+        licensePlate:
+          type: string
+        recordedWeight:
+          type: number
+        timestamp:
+          type: string
+          format: date-time
+
+    entryResponse:
+      type: object
+      properties:
+        entryID:
+          type: string
+        allowed:
+          type: boolean
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - entryID
+        - allowed

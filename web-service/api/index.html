@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiny Parking System - API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(0deg, #cfcfcf 0%, #e7e7e7 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: #547291;
+            color: white;
+            padding: 30px;
+            text-align: left;
+        }
+        
+        main {
+            padding: 30px;
+        }
+        
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #547291;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        
+        .method {
+            display: inline-block;
+            background: #8d8d8d;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: white;
+            margin-right: 6px;
+            font-size: 0.9em;
+        }
+        
+        .method.get { background: #61affe; }
+        .method.post { background: #49cc90; }
+        .method.put { background: #fca130; }
+        .method.delete { background: #f93e3e; }
+
+        a {
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .link {
+            color: #f8f8f8;
+            text-decoration: underline;
+            text-underline-offset: 5px;
+            transition: color 0.1s ease, text-underline-offset 0.25s ease;
+        }
+
+        .link:hover {
+            color: #cae5ff;
+            text-underline-offset: 8px;
+        }
+        
+        code {
+            background: #547291;
+            color: #ecf0f1;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        footer {
+            background: #ecf0f1;
+            padding: 20px 30px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                🅿️ Tiny Parking System API
+            </h1>
+            <p>
+                <a href="https://github.com/AmarS03/Tiny-Parking-System/blob/main/README.md" target="_blank" class="link">
+                    Click here to visit the repository README.md
+                </a>
+            </p>
+        </header>
+        
+        <main>
+            <section>
+                <div class="endpoint">
+                    <span class="method">
+                        /
+                    </span>
+                    <p>
+                        You are here
+                    </p>
+                </div>
+                
+                <div class="endpoint" href="/status">
+                    <span class="method get">
+                        GET
+                    </span>
+                    <code>
+                        /status
+                    </code>
+                    <p>
+                        Returns the status of the ESP microcontroller, the parking info and its sensors
+                    </p>
+                </div>
+                
+                <div class="endpoint" href="/status">
+                    <span class="method put">
+                        PUT
+                    </span>
+                    <code>
+                        /status
+                    </code>
+                    <p>
+                        Updates the status of the ESP microcontroller, the parking info and its sensors
+                    </p>
+                </div>
+                
+                <div class="endpoint" href="/entry">
+                    <span class="method post">
+                        POST
+                    </span>
+                    <code>
+                        /entry
+                    </code>
+                    <p>
+                        Records a vehicle entering the parking system and returns an entryID
+                    </p>
+                </div>
+                
+                <div class="endpoint" href="/entry">
+                    <span class="method post">
+                        POST
+                    </span>
+                    <code>
+                        /entry/{entryID}
+                    </code>
+                    <p>
+                        Records the result of a specific parking entry request (allowed/denied)
+                    </p>
+                </div>
+                
+                <div class="endpoint" href="/exit">
+                    <span class="method post" htr>
+                        POST
+                    </span>
+                    <code>
+                        /exit
+                    </code>
+                    <p>
+                        Records a vehicle exiting the parking system
+                    </p>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>
+                <a href="https://github.com/AmarS03/Tiny-Parking-System" target="_blank" class="link" style="color: #555;">
+                    Project for the Embedded Software for the Internet of Things course - 2025/2026
+                </a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
