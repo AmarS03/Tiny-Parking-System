@@ -20,7 +20,7 @@ app.use((err, req, res, next) => {
 
 module.exports = app;
 
-// If deployed locally, start the server
+// If deployed locally, then start the server
 if (require.main === module) {
   const port = process.env.PORT || 5000;
 
