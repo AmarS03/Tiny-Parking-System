@@ -20,6 +20,7 @@
 #endif
 
 #include "../components/weight/weight.h"
+#include "../components/https/https.h"
 #include "fsm.h"
 
 
@@ -246,6 +247,16 @@ static void capture_and_recognize_plate(void) {
     
     esp_camera_fb_return(fb);
 #endif
+
+    // TEMPORARY: to test HTTP requests
+    https_init();
+    esp_err_t err = https_get_status();
+
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "HTTPS GET /status succeeded");
+    } else {
+        ESP_LOGE(TAG, "HTTPS GET /status failed: %s", esp_err_to_name(err));
+    }
     
     rgb_off();
 }
