@@ -50,8 +50,6 @@ static ultrasonic_sensor_t sensor = {
 #define LED_G_GPIO  GPIO_NUM_7
 #define LED_B_GPIO  GPIO_NUM_8
 
-#define MAX_DISTANCE_CM 500
-
 // API Configuration
 #define SERVER_URL "https://www.circuitdigest.cloud/readnumberplate"
 #define API_KEY    CONFIG_API_KEY

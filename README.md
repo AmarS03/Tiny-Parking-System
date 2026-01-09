@@ -176,7 +176,7 @@ Before getting started, ensure that you have the following installed:
   - Enable ESP PSRAM (through Component config)
     - Enable Octal Flash and set clock speed to 80 MHz
   - Set the correct flash size (usually 8 MB) and make sure that the SPI speed matches the one of the PSRAM (through Serial flasher config)
-  - Set the WiFi SSID and password (these will be locally stored in the configuration file)
+  - Set the WiFi SSID and password in Project Configuration (these will be locally stored in the configuration file)
 
 ### 4. Setting up the Web Service
 - Add the environment keys:
@@ -201,6 +201,9 @@ Before getting started, ensure that you have the following installed:
   - Go back to the configuration menu
   - Make sure to disable PSRAM, otherwise Wokwi will abort the process
   - Go to Project Configuration and enable the mock camera option. This will automatically set the SSID and password to run the example in Wokwi, which uses a pre-fetched mock image to test the CV algorithm.
+  - Go to https://www.circuitdigest.cloud, login or create an account and generate your API key. This will be used to query the cloud server for the NPR algorithm.
+  - Come back to the Project Configuration menu and paste your API key.
+- After everything's set, open the [diagram.json](esp/diagram.json) file and start the simulation. Play with the sensors to see the different interactions.
 
 ## Known issues and possible improvements
 
