@@ -1,12 +1,14 @@
 const express = require('express');
+const path = require('path');
 const statusRouter = require('./routes/status');
 const entryRouter = require('./routes/entry');
 const exitRouter = require('./routes/exit');
 
-const app = express();
 const port = process.env.PORT || 5000;
+
+const app = express();
 app.use(express.json());
-app.get('/', (_, res) => res.sendFile('./index.html', { root: __dirname }));
+app.get('/', (_, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 app.use('/status', statusRouter);
 app.use('/entry', entryRouter);
@@ -22,8 +24,6 @@ module.exports = app;
 
 // If deployed locally, then start the server
 if (require.main === module) {
-  const port = process.env.PORT || 5000;
-
   app.listen(port, () => {
     console.log(`Tiny Parking System API: listening on port ${port}`)
   });
