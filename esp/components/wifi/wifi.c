@@ -102,7 +102,7 @@ void wifi_init_service(void)
             #ifdef CONFIG_USE_MOCK_CAMERA
                 .channel = 6, // Fixed channel for mock camera testing
                 .bssid_set = false,
-            #elif
+            #else
                 .threshold.authmode = WIFI_AUTH_WPA2_PSK,
             #endif
         },
