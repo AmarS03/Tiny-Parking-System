@@ -117,35 +117,27 @@ Tiny-Parking-System
         └── package.json      # React and Next.js dependencies
 ```
 The project follows a service oriented architecture: it uses the component manager provided by ESP-IDF to interact with external driver libraries, which are included in  [idf_component.yml](esp/main/idf_component.yml), and exploits the build system to integrate the developed [components](esp/components/) via CMake. These approach guarantees scalability and modularity for future development.
+
 ### API model:
 
+To communicate the status and events occuring in the system, we developed a very basic API model to send events and update existing logs/info on the main webapp:
+
 - **`/status`**:
-returns a JSON containing the status of the circuit (microcontroller and sensors)
 
-- **`/spots`**:
-returns a JSON containing the info on the parking lot and the parked cars
+  - **`GET`**:
+  returns the status of the ESP microcontroller, the parking info and its sensors
 
-- **`/events`**:
+  - **`PUT`**:
+  updates the status of the ESP microcontroller, the parking info and its sensors
 
-  - **`/entry`**:
-  notifies an entry event (barrier triggered / plate detected)
+- **`/entry`**:
+records a vehicle entering the parking system and returns an entryID
 
-  - **`/exit`**:
-  notifies an exit event
+- **`/entry/{entryID}`**:
+records the result of a specific parking entry request (allowed/denied)
 
-- **`/barrier`**:
-
-  - **`/info`**:
-  returns a JSON containing the info on the parking lot barrier
-
-  - **`/on`**:
-  opens the barrier on command, overriding any other signal
-
-  - **`/off`**:
-  closes the barrier on command, overriding any other signal
-
-  - **`/default`**:
-  leaves the barrier on control of the system
+- **`/exit`**:
+records a vehicle exiting the parking system
 
 
 ## Configuration
