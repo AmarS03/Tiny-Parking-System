@@ -14,10 +14,11 @@
 #define FSM_H_
 
 typedef enum {
-    WEIGHT_DETECTED,
+    VALID_WEIGHT_DETECTED,
     EXIT_DETECTED,
     REMOTE_OPEN,
-    CV_RECOGNITION,
+    PLATE_RECOGNIZED,
+    PLATE_REFUSED,
     NONE
 } Event_t;
 
@@ -33,29 +34,9 @@ typedef enum {
 } State_t;
 
 
-typedef struct {
-    State_t state;
-    void (*state_function)(void);
-} Fsm_t;
+void fsm_handle_event(Event_t event);
 
-
-//////////////////////////////////////////////////////////
-///////////// Functions //////////////////////////////////
-//////////////////////////////////////////////////////////
-
-void init_fn();
-
-void idle_fn();
-
-void entry_fn();
-
-void refuse_fn();
-
-void allow_fn();
-
-void exit_fn();
-
-void closed_fn();
+void fsm_run_state_function();
 
 
 #endif /* FSM_H_ */
