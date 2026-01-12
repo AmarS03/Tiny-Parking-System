@@ -319,19 +319,25 @@ static void capture_and_recognize_plate(void) {
     send_image_to_api(fb->buf, fb->len);
     
     esp_camera_fb_return(fb);
-#endif
-    
+#endif   
+
     rgb_off();
 }
 
 void https_task(void *arg)
 {
     ESP_LOGI(TAG, "HTTPS task started");
+    
+     // TESTING: per vedere se funziona il modulo HTTPS
+    ESP_LOGI(TAG, "----- HTTPS TESTING -----");
+    https_init();
+    esp_err_t err = https_get_status();
 
-    esp_err_t err = https_init();
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "HTTPS init failed: %s", esp_err_to_name(err));
-    }
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "HTTPS GET /status succeeded");
+    } else {
+        ESP_LOGE(TAG, "HTTPS GET /status failed: %s", esp_err_to_name(err));
+    } 
 
     vTaskDelete(NULL);
 }
@@ -370,7 +376,7 @@ void idle_fn() {
     static int32_t weight_in_g = 0;
     static int32_t previous_weight = 0;
 
-    //weight_in_g = weight_read();
+    weight_in_g = weight_read();
 
     if (weight_in_g < 1000 || abs((int32_t)weight_in_g - (int32_t)previous_weight) < 200)  
     {
