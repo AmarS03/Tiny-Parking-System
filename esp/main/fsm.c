@@ -363,6 +363,12 @@ void init_fn() {
 }
 
 
+void recognition_task(void *arg)
+{
+    capture_and_recognize_plate();
+    vTaskDelete(NULL);
+}
+
 /**
  * When in idle state, the system enters low
  * power mode and waits for interrupts
@@ -380,14 +386,14 @@ void idle_fn() {
 
     if (weight_in_g < 1000 || abs((int32_t)weight_in_g - (int32_t)previous_weight) < 200)  
     {
-        //vTaskDelay(pdMS_TO_TICKS(500));
+        vTaskDelay(pdMS_TO_TICKS(500));
     } else {
         ESP_LOGI("IDLE", "Vehicle detected! Weight: %d g", (int32_t)weight_in_g);
         rgb_green();  // Green LED = vehicle detected
         vTaskDelay(pdMS_TO_TICKS(500)); // Debounce delay
-        capture_and_recognize_plate();
+        xTaskCreate(recognition_task, "recognition_task", 8192, NULL, 6, NULL);
     }
-    //vTaskDelay(pdMS_TO_TICKS(200));
+    vTaskDelay(pdMS_TO_TICKS(200));
     previous_weight = weight_in_g;
 }
 

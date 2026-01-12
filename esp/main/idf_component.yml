@@ -17,3 +17,4 @@ dependencies:
   espressif/esp32-camera: '*'
   esp-idf-lib/ultrasonic: '*'
   esp-idf-lib/hx711: '*'
+  espressif/cjson: '*'

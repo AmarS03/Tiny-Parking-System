@@ -61,6 +61,16 @@ dependencies:
     - esp32s2
     - esp32s3
     version: 1.1.0
+  espressif/cjson:
+    component_hash: 9372811fb197926f522c467627cf4a8e72b681e0366e17879631da801103aef3
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.7.19
   espressif/esp32-camera:
     component_hash: f0a608b109935a5389221eee5090ec61f51b0df1a0749531fe59d33aaf263233
     dependencies:
@@ -92,8 +102,9 @@ dependencies:
 direct_dependencies:
 - esp-idf-lib/hx711
 - esp-idf-lib/ultrasonic
+- espressif/cjson
 - espressif/esp32-camera
 - idf
-manifest_hash: 2e7f325a2b2110f649a4ed3e73581bfe321345de80c6a2a862fbf53ece8b41cc
+manifest_hash: f3516edc5c1469ae640d79d6e3f7ac67f30b7257be973dc9c6b1d0ff4a26ddb1
 target: esp32s3
 version: 2.0.0
