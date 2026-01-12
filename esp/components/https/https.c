@@ -46,25 +46,32 @@ static esp_err_t http_event_handler(esp_http_client_event_handle_t evt)
 
 // Formats the response buffer as pretty JSON and prints it to console
 void print_response_buffer() {
-    ESP_LOGI(TAG, "---------- Response content: ------------- \n");
+    printf("\n---------- Response content: -------------\n\n");
 
     cJSON *root = cJSON_Parse(response_buffer);
+
     if (root == NULL) {
-        ESP_LOGE(TAG, "Invalid JSON, cannot format");
-        printf("%s\n\n", response_buffer); // fallback
-        return;
+        printf("%s", response_buffer); // fallback
+    } else {
+        char *pretty = cJSON_Print(root);
+
+        if (pretty) {
+            // Replaces tabs with 2 spaces for better readability
+            for (char *p = pretty; *p; p++) {
+                if (*p == '\t') {
+                    printf("  ");
+                } else {
+                    putchar(*p);
+                }
+            }
+            
+            free(pretty);
+        }
+
+        cJSON_Delete(root);
     }
-
-    char *pretty = cJSON_Print(root);
-
-    if (pretty) {
-        printf("%s\n\n", pretty);
-        free(pretty);
-    }
-
-    cJSON_Delete(root);
     
-    ESP_LOGI(TAG, "------------------------------------------");
+    printf("\n\n------------------------------------------\n\n");
 }
 
 /**
