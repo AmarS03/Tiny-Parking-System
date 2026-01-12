@@ -32,6 +32,7 @@
 #endif
 
 #include "../components/weight/weight.h"
+#include "../components/https/https.h"
 
 // Current state of the FSM
 static State_t curr_state = INIT;
@@ -319,9 +320,21 @@ static void capture_and_recognize_plate(void) {
     
     esp_camera_fb_return(fb);
 #endif
-    
+
+    // TESTING: per vedere se funziona il modulo HTTPS
+    ESP_LOGI(TAG, "----- HTTPS TESTING -----");
+    https_init();
+    esp_err_t err = https_get_status();
+
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "HTTPS GET /status succeeded");
+    } else {
+        ESP_LOGE(TAG, "HTTPS GET /status failed: %s", esp_err_to_name(err));
+    }    
+
     rgb_off();
 }
+
 
 /**
  * Initializes hardware and other software
