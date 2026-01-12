@@ -125,10 +125,9 @@ void weight_sensor_init()
 
 void wifi_init()
 {
-    wifi_init_service();
-
     while (!wifi_is_connected()) {
         ESP_LOGI("WIFI_INIT", "Waiting for WiFi connection...");
+        wifi_init_service();
         vTaskDelay(pdMS_TO_TICKS(500));
     }
 

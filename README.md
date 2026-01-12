@@ -169,6 +169,7 @@ Before getting started, ensure that you have the following installed:
     - Enable Octal Flash and set clock speed to 80 MHz
   - Set the correct flash size (usually 8 MB) and make sure that the SPI speed matches the one of the PSRAM (through Serial flasher config)
   - Set the WiFi SSID and password in Project Configuration (these will be locally stored in the configuration file)
+  - Set the Partition Table to large single factory app; this will allow you to flash the executable on the device
 
 ### 4. Setting up the Web Service
 - Add the environment keys:

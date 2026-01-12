@@ -7,6 +7,9 @@
 
 #include "https.h"
 #include "esp_http_client.h"
+#include "esp_tls.h"
+#include "esp_crt_bundle.h"
+
 #include "esp_log.h"
 #include "esp_err.h"
 #include "esp_crt_bundle.h"
@@ -14,6 +17,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <sys/param.h>
 
 #define SERVER_URL "https://tinyparkingsystem-api.vercel.app/"
 #define MAX_HTTP_OUTPUT_BUFFER 1024

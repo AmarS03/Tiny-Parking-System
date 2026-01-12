@@ -319,9 +319,16 @@ static void capture_and_recognize_plate(void) {
     send_image_to_api(fb->buf, fb->len);
     
     esp_camera_fb_return(fb);
-#endif
+#endif   
 
-    // TESTING: per vedere se funziona il modulo HTTPS
+    rgb_off();
+}
+
+void https_task(void *arg)
+{
+    ESP_LOGI(TAG, "HTTPS task started");
+    
+     // TESTING: per vedere se funziona il modulo HTTPS
     ESP_LOGI(TAG, "----- HTTPS TESTING -----");
     https_init();
     esp_err_t err = https_get_status();
@@ -330,11 +337,10 @@ static void capture_and_recognize_plate(void) {
         ESP_LOGI(TAG, "HTTPS GET /status succeeded");
     } else {
         ESP_LOGE(TAG, "HTTPS GET /status failed: %s", esp_err_to_name(err));
-    }    
+    } 
 
-    rgb_off();
+    vTaskDelete(NULL);
 }
-
 
 /**
  * Initializes hardware and other software
@@ -344,6 +350,8 @@ void init_fn() {
     hw_init();
     //other initializations
     wifi_init();
+
+    xTaskCreate(https_task, "https_init", 8192, NULL, 6, NULL);
 
     #ifdef CONFIG_USE_MOCK_CAMERA
     ESP_LOGI("IDLE", "Running in MOCK CAMERA mode (Wokwi simulation)");
@@ -372,14 +380,14 @@ void idle_fn() {
 
     if (weight_in_g < 1000 || abs((int32_t)weight_in_g - (int32_t)previous_weight) < 200)  
     {
-        vTaskDelay(pdMS_TO_TICKS(500));
+        //vTaskDelay(pdMS_TO_TICKS(500));
     } else {
         ESP_LOGI("IDLE", "Vehicle detected! Weight: %d g", (int32_t)weight_in_g);
         rgb_green();  // Green LED = vehicle detected
         vTaskDelay(pdMS_TO_TICKS(500)); // Debounce delay
         capture_and_recognize_plate();
     }
-    vTaskDelay(pdMS_TO_TICKS(200));
+    //vTaskDelay(pdMS_TO_TICKS(200));
     previous_weight = weight_in_g;
 }
 
