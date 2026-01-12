@@ -32,6 +32,7 @@
 #endif
 
 #include "../components/weight/weight.h"
+#include "../components/https/https.h"
 
 // Current state of the FSM
 static State_t curr_state = INIT;
@@ -323,6 +324,18 @@ static void capture_and_recognize_plate(void) {
     rgb_off();
 }
 
+void https_task(void *arg)
+{
+    ESP_LOGI(TAG, "HTTPS task started");
+
+    esp_err_t err = https_init();
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "HTTPS init failed: %s", esp_err_to_name(err));
+    }
+
+    vTaskDelete(NULL);
+}
+
 /**
  * Initializes hardware and other software
  * components
@@ -331,6 +344,8 @@ void init_fn() {
     hw_init();
     //other initializations
     wifi_init();
+
+    xTaskCreate(https_task, "https_init", 8192, NULL, 6, NULL);
 
     #ifdef CONFIG_USE_MOCK_CAMERA
     ESP_LOGI("IDLE", "Running in MOCK CAMERA mode (Wokwi simulation)");
@@ -355,18 +370,18 @@ void idle_fn() {
     static int32_t weight_in_g = 0;
     static int32_t previous_weight = 0;
 
-    weight_in_g = weight_read();
+    //weight_in_g = weight_read();
 
     if (weight_in_g < 1000 || abs((int32_t)weight_in_g - (int32_t)previous_weight) < 200)  
     {
-        vTaskDelay(pdMS_TO_TICKS(500));
+        //vTaskDelay(pdMS_TO_TICKS(500));
     } else {
         ESP_LOGI("IDLE", "Vehicle detected! Weight: %d g", (int32_t)weight_in_g);
         rgb_green();  // Green LED = vehicle detected
         vTaskDelay(pdMS_TO_TICKS(500)); // Debounce delay
         capture_and_recognize_plate();
     }
-    vTaskDelay(pdMS_TO_TICKS(200));
+    //vTaskDelay(pdMS_TO_TICKS(200));
     previous_weight = weight_in_g;
 }
 

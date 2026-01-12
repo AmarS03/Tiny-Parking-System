@@ -1,2 +1,0 @@
-in menuconfig: MBEDTLS_CERTIFICATE_BUNDLE = y
-per mock il nome del wifi è Wokwi-GUEST mentre la password e "" empty string

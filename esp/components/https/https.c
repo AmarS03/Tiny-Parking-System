@@ -7,13 +7,17 @@
 
 #include "https.h"
 #include "esp_http_client.h"
+#include "esp_tls.h"
+#include "esp_crt_bundle.h"
+
 #include "esp_log.h"
 #include "esp_err.h"
 #include <string.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <sys/param.h>
 
-#define SERVER_URL "https://192.168.1.74:5000/"
+#define SERVER_URL "http://localhost:5000/"
 #define MAX_HTTP_OUTPUT_BUFFER 1024
 
 static const char *TAG = "HTTPS Module:";
@@ -23,13 +27,66 @@ static esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
     switch (evt -> event_id) {
         case HTTP_EVENT_ON_DATA:
-            if (evt -> user_data && evt -> data_len > 0) {
-                strncat(
-                    (char *) evt -> user_data,
-                    (char *) evt -> data,
-                    MAX_HTTP_OUTPUT_BUFFER - strlen(evt -> user_data) - 1
-                );
+            // if (evt -> user_data && evt -> data_len > 0) {
+            //     strncat(
+            //         (char *) evt -> user_data,
+            //         (char *) evt -> data,
+            //         MAX_HTTP_OUTPUT_BUFFER - strlen(evt -> user_data) - 1
+            //     );
+            // }
+            // break;
+
+            static char *output_buffer;  // Buffer to store response of http request from event handler
+            static int output_len;       // Stores number of bytes read
+
+            // Clean the buffer in case of a new request
+            if (output_len == 0 && evt->user_data) {
+                // we are just starting to copy the output data into the use
+                memset(evt->user_data, 0, MAX_HTTP_OUTPUT_BUFFER);
             }
+            /*
+             *  Check for chunked encoding is added as the URL for chunked encoding used in this example returns binary data.
+             *  However, event handler can also be used in case chunked encoding is used.
+             */
+            if (!esp_http_client_is_chunked_response(evt->client)) {
+                // If user_data buffer is configured, copy the response into the buffer
+                int copy_len = 0;
+                if (evt->user_data) {
+                    ESP_LOGI(TAG, "Using user_data buffer for response");
+                    // The last byte in evt->user_data is kept for the NULL character in case of out-of-bound access.
+                    copy_len = MIN(evt->data_len, (MAX_HTTP_OUTPUT_BUFFER - output_len));
+                    if (copy_len) {
+                        memcpy(evt->user_data + output_len, evt->data, copy_len);
+                        ESP_LOGI(TAG, "Copied %d bytes to user_data buffer", copy_len);
+                        ESP_LOGI(TAG, "Total output_len=%d", output_len + copy_len);
+                    }
+                } else {
+                    ESP_LOGI(TAG, "Using internal output_buffer for response");
+                    int content_len = esp_http_client_get_content_length(evt->client);
+                    if (output_buffer == NULL) {
+                        // We initialize output_buffer with 0 because it is used by strlen() and similar functions therefore should be null terminated.
+                        output_buffer = (char *) calloc(content_len + 1, sizeof(char));
+                        output_len = 0;
+                        if (output_buffer == NULL) {
+                            ESP_LOGE(TAG, "Failed to allocate memory for output buffer");
+                            return ESP_FAIL;
+                        }
+                    }
+                    copy_len = MIN(evt->data_len, (content_len - output_len));
+                    if (copy_len) {
+                        memcpy(output_buffer + output_len, evt->data, copy_len);
+                    }
+                    ESP_LOGI(TAG, "Copied %d bytes to output_buffer", copy_len);
+                    ESP_LOGI(TAG, "Total output_len=%d", output_len + copy_len);
+                    // Output the received data
+                    if (output_len + copy_len >= content_len) {
+                        ESP_LOGI(TAG, "Complete data received:\n%s", output_buffer);
+                        free(output_buffer);
+                        output_buffer = NULL;
+                }
+                output_len += copy_len;
+            }
+        }
             break;
         default:
             break;
@@ -49,20 +106,29 @@ esp_err_t perform_https_request(const char *url, esp_http_client_method_t method
         .url = url,
         .method = method,
         .event_handler = _http_event_handler,
-        .user_data = response_buffer,
-        .timeout_ms = 5000,
+        //.user_data = response_buffer,  // Passes the response buffer to the event handler
+        .timeout_ms = 10000,
         .skip_cert_common_name_check = true,  // Skips certificate verification
         .transport_type = HTTP_TRANSPORT_OVER_SSL,
+        .crt_bundle_attach = esp_crt_bundle_attach,
+        .buffer_size = 4096,
+        .buffer_size_tx = 4096,
     };
+
+    ESP_LOGI(TAG, "Configuring HTTP client for URL: %s", url);
 
     // Initializes the HTTP client
     esp_http_client_handle_t client = esp_http_client_init(&config);
+
+    ESP_LOGI(TAG, "HTTP Client initialized for URL: %s", url);
 
     // Setting headers and request body if payload is provided
     if (payload != NULL) {
         esp_http_client_set_header(client, "Content-Type", "application/json");
         esp_http_client_set_post_field(client, payload, strlen(payload));
     }
+
+    ESP_LOGI(TAG, "Before esp_http_client_perform()");
 
     // Performs the HTTP request
     esp_err_t err = esp_http_client_perform(client);
@@ -93,10 +159,10 @@ esp_err_t perform_https_request(const char *url, esp_http_client_method_t method
 esp_err_t https_init(void)
 {
     ESP_LOGI(TAG, "called https_init(), performing test GET request...");
-    char response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
-    
+    char response_buffer[MAX_HTTP_OUTPUT_BUFFER + 1] = {0};
+
     esp_err_t err = perform_https_request(
-        "https://jsonplaceholder.typicode.com/todos/1",
+        "https://httpbin.org/get",
         HTTP_METHOD_GET,
         NULL,
         response_buffer
