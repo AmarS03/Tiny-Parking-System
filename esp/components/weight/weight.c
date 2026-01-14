@@ -1,7 +1,7 @@
 /**
  * @file weight.c
  * 
- * Clean interface to calibrate and read weight sensor
+ * Interface used to calibrate and read weight sensor
  * 
  */
 #include "weight.h"

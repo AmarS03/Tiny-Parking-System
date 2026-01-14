@@ -19,6 +19,7 @@
 #include <inttypes.h>
 #include <sys/param.h>
 
+// Backend server API
 #define SERVER_URL "https://tinyparkingsystem-api.vercel.app/"
 #define MAX_HTTP_OUTPUT_BUFFER 1024
 
@@ -75,7 +76,10 @@ void print_response_buffer() {
 }
 
 /**
- * @brief Generic method used to perform all of the needed GET/POST/PUT requests
+ * @brief Generic method used to perform a REST API request to a specific URL
+ * @param url The full URL to send the request to
+ * @param method The HTTP method to use (GET, POST, PUT, etc.)
+ * @param payload The request body payload (for POST/PUT requests), or NULL if none
  * @return ESP_OK on success, error code otherwise
  */
 esp_err_t perform_https_request(const char *url, esp_http_client_method_t method, const char *payload)
@@ -138,16 +142,7 @@ esp_err_t perform_https_request(const char *url, esp_http_client_method_t method
 esp_err_t https_init(void)
 {
     ESP_LOGI(TAG, "called https_init(), performing test GET request...");
-    
-    esp_err_t err = perform_https_request(
-        "https://httpbin.org/get",
-        HTTP_METHOD_GET,
-        NULL
-    );
-    
-    print_response_buffer();
-
-    return err;
+    return https_get_status();
 }
 
 /**

@@ -4,8 +4,7 @@
  * This file contains the main initialization
  * functions for the hardware peripherals
  * and the overall components of the system
- */
-
+*/
 
 #include "init.h"
 #include "../components/wifi/wifi.h"
@@ -15,14 +14,14 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
+#include "driver/gpio.h"
 #include <esp_idf_lib_helpers.h>
 #include "ultrasonic.h"
 
 #ifndef CONFIG_USE_MOCK_CAMERA
+
 #include "esp_camera.h"
 #include "esp_psram.h"
-
-// Camera pin definitions
 #define CAM_PWDN GPIO_NUM_38
 #define CAM_RESET -1   //software reset will be performed
 #define CAM_VSYNC GPIO_NUM_6
@@ -39,12 +38,17 @@
 #define CAM_D5 GPIO_NUM_18
 #define CAM_D6 GPIO_NUM_17
 #define CAM_D7 GPIO_NUM_16
+
 #endif
+
+// RGB LED pin definitions
+#define LED_R_GPIO  GPIO_NUM_6
+#define LED_G_GPIO  GPIO_NUM_7
+#define LED_B_GPIO  GPIO_NUM_8
 
 // Ultrasonic sensor pin definitions
 #define TRIG_GPIO   GPIO_NUM_42
 #define ECHO_GPIO   GPIO_NUM_41
-
 
 void hw_init()
 {
@@ -53,6 +57,33 @@ void hw_init()
     #endif
     ultrasonic_sensor_init();
     weight_sensor_init();
+}
+
+static void rgb_off(void) {
+    gpio_set_level(LED_R_GPIO, 1);
+    gpio_set_level(LED_G_GPIO, 1);
+    gpio_set_level(LED_B_GPIO, 1);
+}
+
+static void rgb_green(void) {
+    gpio_set_level(LED_R_GPIO, 1);
+    gpio_set_level(LED_G_GPIO, 0);
+    gpio_set_level(LED_B_GPIO, 1);
+}
+
+static void rgb_blue(void) {
+    gpio_set_level(LED_R_GPIO, 1);
+    gpio_set_level(LED_G_GPIO, 1);
+    gpio_set_level(LED_B_GPIO, 0);
+}
+
+static void rgb_init(void) {
+    gpio_config_t io = {0};
+    io.pin_bit_mask = (1ULL << LED_R_GPIO) | (1ULL << LED_G_GPIO) | (1ULL << LED_B_GPIO);
+    io.mode = GPIO_MODE_OUTPUT;
+    io.intr_type = GPIO_INTR_DISABLE;
+    gpio_config(&io);
+    rgb_off();
 }
 
 #ifndef CONFIG_USE_MOCK_CAMERA
