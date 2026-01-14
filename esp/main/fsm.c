@@ -212,6 +212,15 @@ void init_fn() {
     curr_state = IDLE;
 }
 
+
+void recognition_task(void *arg)
+{
+    ESP_LOGI("RECOGNITION", "Starting recognition task...");
+    capture_and_recognize_plate();
+    ESP_LOGI("RECOGNITION", "Recognition task completed.");
+    vTaskDelete(NULL);
+}
+
 /**
  * When in idle state, the system enters low
  * power mode and waits for interrupts
@@ -239,6 +248,7 @@ void idle_fn() {
         ESP_LOGI("IDLE", "Vehicle detected! Weight: %d g", (int32_t)weight_in_g);
         vTaskDelay(pdMS_TO_TICKS(500)); // Debounce delay
         xTaskCreate(recognition_task, "recognition_task", 8192, NULL, 6, NULL);
+>>>>>>>>> Temporary merge branch 2
     }
     vTaskDelay(pdMS_TO_TICKS(200));
     previous_weight = weight_in_g;
