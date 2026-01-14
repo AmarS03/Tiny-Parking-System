@@ -287,6 +287,10 @@ static esp_err_t send_image_to_api(const uint8_t *image_data, size_t image_len) 
     if (err == ESP_OK) {
         int status = esp_http_client_get_status_code(client);
         ESP_LOGI(TAG, "HTTP POST Status = %d", status);
+        if (status == 200) {
+            ESP_LOGI(TAG, "Plate recognized successfully");
+            fsm_handle_event(PLATE_RECOGNIZED);
+        }
     } else {
         ESP_LOGE(TAG, "HTTP POST request failed: %s", esp_err_to_name(err));
     }
@@ -353,6 +357,8 @@ void init_fn() {
 
     xTaskCreate(https_task, "https_init", 8192, NULL, 6, NULL);
 
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
     #ifdef CONFIG_USE_MOCK_CAMERA
     ESP_LOGI("IDLE", "Running in MOCK CAMERA mode (Wokwi simulation)");
     #endif
@@ -365,7 +371,9 @@ void init_fn() {
 
 void recognition_task(void *arg)
 {
+    ESP_LOGI("RECOGNITION", "Starting recognition task...");
     capture_and_recognize_plate();
+    ESP_LOGI("RECOGNITION", "Recognition task completed.");
     vTaskDelete(NULL);
 }
 
@@ -374,8 +382,13 @@ void recognition_task(void *arg)
  * power mode and waits for interrupts
  */
 void idle_fn() {
-    //wait for event
-    //esp_light_sleep_start();
+    /** 
+     * Wait for event
+     * wake up every 500ms to check weight sensor
+     */
+    // esp_sleep_enable_timer_wakeup(500000);
+    // esp_light_sleep_start();
+
     /**
      * Mock weight detection logic
      */
@@ -390,8 +403,7 @@ void idle_fn() {
     } else {
         ESP_LOGI("IDLE", "Vehicle detected! Weight: %d g", (int32_t)weight_in_g);
         rgb_green();  // Green LED = vehicle detected
-        vTaskDelay(pdMS_TO_TICKS(500)); // Debounce delay
-        xTaskCreate(recognition_task, "recognition_task", 8192, NULL, 6, NULL);
+        fsm_handle_event(VALID_WEIGHT_DETECTED);
     }
     vTaskDelay(pdMS_TO_TICKS(200));
     previous_weight = weight_in_g;
@@ -402,7 +414,9 @@ void idle_fn() {
  * Decide whether to allow or refuse entrance
  */
 void entry_fn() {
-
+    vTaskDelay(pdMS_TO_TICKS(500)); // Debounce delay
+    xTaskCreate(recognition_task, "recognition_task", 8192, NULL, 6, NULL);
+    ESP_LOGI("ENTRY", "Running recognition task...");
 }
 
 /**
@@ -418,7 +432,10 @@ void refuse_fn() {
  * on the LCD and opens the gate bar
  */
 void allow_fn() {
+    // Open gate bar logic here
 
+    // Go back to IDLE for now
+    curr_state = IDLE;
 }
 
 /**
