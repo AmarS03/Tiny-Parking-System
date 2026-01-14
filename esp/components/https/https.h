@@ -10,8 +10,10 @@
 
 #include "esp_err.h"
 #include "esp_http_client.h"
+#include <stdint.h>
+#include <stddef.h>
 
-// Generic method used to perform all of the needed GET/POST/PUT requests
+// Generic method used to perform a REST API request to a specific URL
 esp_err_t perform_https_request(const char *url, esp_http_client_method_t method, const char *payload);
 
 // Initializes the HTTPS client (by testing a simple GET request)
@@ -31,5 +33,8 @@ esp_err_t https_post_entry_id(const char *entry_id, const char *json_payload);
 
 // Performs a POST to /exit with a JSON payload
 esp_err_t https_post_exit(const char *json_payload);
+
+// Sends an image to the external API for plate recognition and returns the plate string
+char* plate_recognition_api(const uint8_t *image_data, size_t image_len);
 
 #endif /* HTTPS_H */
