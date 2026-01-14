@@ -201,6 +201,8 @@ void init_fn() {
 
     xTaskCreate(https_task, "https_init", 8192, NULL, 6, NULL);
 
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
     #ifdef CONFIG_USE_MOCK_CAMERA
     ESP_LOGI("IDLE", "Running in MOCK CAMERA mode (Wokwi simulation)");
     #endif
@@ -210,13 +212,27 @@ void init_fn() {
     curr_state = IDLE;
 }
 
+
+void recognition_task(void *arg)
+{
+    ESP_LOGI("RECOGNITION", "Starting recognition task...");
+    capture_and_recognize_plate();
+    ESP_LOGI("RECOGNITION", "Recognition task completed.");
+    vTaskDelete(NULL);
+}
+
 /**
  * When in idle state, the system enters low
  * power mode and waits for interrupts
  */
 void idle_fn() {
-    //wait for event
-    //esp_light_sleep_start();
+    /** 
+     * Wait for event
+     * wake up every 500ms to check weight sensor
+     */
+    // esp_sleep_enable_timer_wakeup(500000);
+    // esp_light_sleep_start();
+
     /**
      * Mock weight detection logic
      */
@@ -232,6 +248,7 @@ void idle_fn() {
         ESP_LOGI("IDLE", "Vehicle detected! Weight: %d g", (int32_t)weight_in_g);
         vTaskDelay(pdMS_TO_TICKS(500)); // Debounce delay
         xTaskCreate(recognition_task, "recognition_task", 8192, NULL, 6, NULL);
+        fsm_handle_event(VALID_WEIGHT_DETECTED);
     }
     vTaskDelay(pdMS_TO_TICKS(200));
     previous_weight = weight_in_g;
@@ -242,7 +259,9 @@ void idle_fn() {
  * Decide whether to allow or refuse entrance
  */
 void entry_fn() {
-
+    vTaskDelay(pdMS_TO_TICKS(500)); // Debounce delay
+    xTaskCreate(recognition_task, "recognition_task", 8192, NULL, 6, NULL);
+    ESP_LOGI("ENTRY", "Running recognition task...");
 }
 
 /**
@@ -258,7 +277,10 @@ void refuse_fn() {
  * on the LCD and opens the gate bar
  */
 void allow_fn() {
+    // Open gate bar logic here
 
+    // Go back to IDLE for now
+    curr_state = IDLE;
 }
 
 /**
