@@ -10,6 +10,8 @@
 #include "esp_tls.h"
 #include "esp_crt_bundle.h"
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "esp_log.h"
 #include "esp_err.h"
 #include "esp_crt_bundle.h"
@@ -102,6 +104,8 @@ esp_err_t perform_cv_api_request(const char *payload, size_t payload_len)
         .skip_cert_common_name_check = true,
     };
     
+    vTaskDelay(pdMS_TO_TICKS(10));
+
     esp_http_client_handle_t client = esp_http_client_init(&config);
     esp_http_client_set_header(client, "Content-Type", content_type);
     esp_http_client_set_header(client, "Authorization", CV_API_KEY);
@@ -110,6 +114,7 @@ esp_err_t perform_cv_api_request(const char *payload, size_t payload_len)
     // Perform the HTTP POST request and prints the response
     esp_err_t err = esp_http_client_perform(client);
 
+    vTaskDelay(pdMS_TO_TICKS(10));
     // Truncate response buffer to a null-terminated string
     if (response_len < sizeof(api_response_buffer)) {
         api_response_buffer[response_len] = '\0';
@@ -193,6 +198,8 @@ esp_err_t prepare_image_payload(const uint8_t *image_data, size_t image_len) {
         free(data_header);
         return ESP_ERR_NO_MEM;
     }
+
+    vTaskDelay(pdMS_TO_TICKS(10));
 
     // Build payload with header, image data, and footer
     memcpy(post_data, data_header, data_header_len);

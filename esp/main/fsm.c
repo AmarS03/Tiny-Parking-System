@@ -42,16 +42,27 @@ extern const uint8_t mock_image_end[]   asm("_binary_mock_plate_jpg_end");
 
 // Idle delay function for low power mode
 #ifdef CONFIG_USE_MOCK_CAMERA
-    #define IDLE_DELAY() vTaskDelay(pdMS_TO_TICKS(500))
+    #define IDLE_DELAY() vTaskDelay(pdMS_TO_TICKS(200))
 #else
     #define IDLE_DELAY() do { \
-        esp_sleep_enable_timer_wakeup(500000); \
+        esp_sleep_enable_timer_wakeup(200000); \
         esp_light_sleep_start(); \
     } while(0)
 #endif
 
+#define YIELD() vTaskDelay(pdMS_TO_TICKS(10))
+
 // Current state of the FSM
 static State_t curr_state = INIT;
+
+// Weight detection enabled flag
+static volatile bool weight_enabled = true;
+
+// Handle for recognition task (allows to block/unblock it)
+static TaskHandle_t recognition_task_handle = NULL;
+// Recognition busy flag
+static volatile bool recognition_busy = false;
+
 
 // Prototypes of state functions
 static void init_fn();
@@ -150,49 +161,96 @@ void https_task(void *arg)
     vTaskDelete(NULL);
 }
 
+
+/**
+ * Plate recognition task
+ * Waits for notification from weight task,
+ * then captures image and sends to CV API.
+ * The use of task notification allows to
+ * efficiently block/unblock the task without
+ * busy waiting and is generally more lightweight
+ * than using semaphores or event groups.
+ * Based on the result of the recognition, it
+ * triggers the appropriate FSM event.
+ */
 void recognition_task(void *arg)
 {   
-    ESP_LOGI(TAG, "Plate recognition task started...");
-    
-#ifdef CONFIG_USE_MOCK_CAMERA
-    // MOCK VERSION: Use embedded image
-    size_t image_size = mock_image_end - mock_image_start;
-    ESP_LOGI(TAG, "Using MOCK image (%d bytes)", image_size);
-    prepare_image_payload(mock_image_start, image_size);
-#else
-    // REAL VERSION: Capture from camera
-    camera_fb_t *fb = esp_camera_fb_get();
-    if (!fb) {
-        ESP_LOGE(TAG, "Camera capture failed");
-        return;
+    while (1) {
+        // Block until weight detection signals entry
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        recognition_busy = true;
+
+        ESP_LOGI(TAG, "Plate recognition task started...");
+        
+    #ifdef CONFIG_USE_MOCK_CAMERA
+        // MOCK VERSION: Use embedded image
+        size_t image_size = mock_image_end - mock_image_start;
+        ESP_LOGI(TAG, "Using MOCK image (%d bytes)", image_size);
+        prepare_image_payload(mock_image_start, image_size);
+    #else
+        // REAL VERSION: Capture from camera
+        camera_fb_t *fb = esp_camera_fb_get();
+        if (!fb) {
+            ESP_LOGE(TAG, "Camera capture failed");
+            return;
+        }
+        
+        ESP_LOGI(TAG, "Camera captured %d bytes", fb->len);
+        prepare_image_payload(fb->buf, fb->len);
+    #endif
+
+        YIELD();
+
+        const char *plate = extract_plate_from_response();
+        YIELD();
+        const char *image_link = extract_image_link_from_response();
+
+        if (plate != NULL && image_link != NULL) {
+            ESP_LOGI(TAG, "===== PLATE DETECTED: %s =====", plate);
+            ESP_LOGI(TAG, "===== IMAGE LINK: %s =====", image_link);
+
+            fsm_handle_event(PLATE_RECOGNIZED);
+        } else {
+            ESP_LOGE(TAG, "Plate recognition failed");
+
+            fsm_handle_event(PLATE_REFUSED);
+        }
+        
+        free((void*) plate);
+        free((void*) image_link);
+
+    #ifndef CONFIG_USE_MOCK_CAMERA
+        esp_camera_fb_return(fb);
+    #endif
+
+        recognition_busy = false;
     }
-    
-    ESP_LOGI(TAG, "Camera captured %d bytes", fb->len);
-    prepare_image_payload(fb->buf, fb->len);
-#endif
+}
 
-    const char *plate = extract_plate_from_response();
-    const char *image_link = extract_image_link_from_response();
+/**
+ * Weight detection task
+ * Continuously monitors the weight sensor (since
+ * it can't generate an interrupt directly).
+ * When a valid weight is detected, it triggers
+ * the appropriate FSM event.
+ */
+void weight_task(void *arg) {
+    ESP_LOGI(TAG, "Starting weight detection task...");
 
-    if (plate != NULL && image_link != NULL) {
-        ESP_LOGI(TAG, "===== PLATE DETECTED: %s =====", plate);
-        ESP_LOGI(TAG, "===== IMAGE LINK: %s =====", image_link);
+    while (1) {
+        // Check if weight detection is enabled
+        if (!weight_enabled) {
+            vTaskDelay(pdMS_TO_TICKS(500));
+            continue;
+        }
 
-        fsm_handle_event(PLATE_RECOGNIZED);
-    } else {
-        ESP_LOGE(TAG, "Plate recognition failed");
-
-        fsm_handle_event(PLATE_REFUSED);
+        if (weight_detect_vehicle()) {
+            ESP_LOGI(TAG, "Valid weight detected!");
+            fsm_handle_event(VALID_WEIGHT_DETECTED);
+        }
+        // Sleep for 200 ms before next reading
+        IDLE_DELAY();
     }
-    
-    free((void*) plate);
-    free((void*) image_link);
-
-#ifndef CONFIG_USE_MOCK_CAMERA
-    esp_camera_fb_return(fb);
-#endif
-
-    vTaskDelete(NULL);
 }
 
 
@@ -209,6 +267,10 @@ void init_fn() {
 
     vTaskDelay(pdMS_TO_TICKS(5000));
 
+    xTaskCreate(weight_task, "weight_task", 8192, NULL, 5, NULL);
+
+    xTaskCreate(recognition_task, "recognition_task", 12288, NULL, 5, &recognition_task_handle);
+
     #ifdef CONFIG_USE_MOCK_CAMERA
     ESP_LOGI("IDLE", "Running in MOCK CAMERA mode (Wokwi simulation)");
     #endif
@@ -223,27 +285,8 @@ void init_fn() {
  * power mode and waits for interrupts
  */
 void idle_fn() {
-    // wait for event and wake up periodically
-    IDLE_DELAY();
-
-    /**
-     * Mock weight detection logic
-     */
-    static int32_t weight_in_g = 0;
-    static int32_t previous_weight = 0;
-
-    weight_in_g = weight_read();
-
-    if (weight_in_g < 1000 || abs((int32_t)weight_in_g - (int32_t)previous_weight) < 200)  
-    {
-        vTaskDelay(pdMS_TO_TICKS(500));
-    } else {
-        ESP_LOGI("IDLE", "Vehicle detected! Weight: %d g", (int32_t)weight_in_g);
-        vTaskDelay(pdMS_TO_TICKS(500)); // Debounce delay
-        xTaskCreate(recognition_task, "recognition_task", 8192, NULL, 6, NULL);
-    }
-    vTaskDelay(pdMS_TO_TICKS(200));
-    previous_weight = weight_in_g;
+    // System waiting for an event
+    weight_enabled = true;
 }
 
 /**
@@ -251,10 +294,12 @@ void idle_fn() {
  * Decide whether to allow or refuse entrance
  */
 void entry_fn() {
-    vTaskDelay(pdMS_TO_TICKS(500)); // Debounce delay
-    xTaskCreate(recognition_task, "recognition_task", 12288, NULL, 6, NULL);
-    ESP_LOGI("ENTRY", "Running recognition task...");
-    vTaskDelay(pdMS_TO_TICKS(10000)); // Wait for recognition to complete
+    weight_enabled = false;
+   
+    if (recognition_task_handle != NULL && !recognition_busy) {
+        // Unblock recognition task
+        xTaskNotifyGive(recognition_task_handle);
+    }
 }
 
 /**
@@ -262,7 +307,9 @@ void entry_fn() {
  * message on the LCD
  */
 void refuse_fn() {
-
+    ESP_LOGI("REFUSE", "Entry refused. Access denied.");
+    vTaskDelay(pdMS_TO_TICKS(5000));
+    curr_state = IDLE;
 }
 
 /**
@@ -270,8 +317,11 @@ void refuse_fn() {
  * on the LCD and opens the gate bar
  */
 void allow_fn() {
+    ESP_LOGI("ALLOW", "Entry allowed. Opening gate...");
+    vTaskDelay(pdMS_TO_TICKS(5000));
     // Open gate bar logic here
 
+    curr_state = IDLE;
 }
 
 /**

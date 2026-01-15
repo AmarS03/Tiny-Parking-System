@@ -11,6 +11,7 @@
 #include "../components/weight/weight.h"
 
 #include "esp_log.h"
+#include "esp_err.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
@@ -141,7 +142,11 @@ void ultrasonic_sensor_init()
         .echo_pin = ECHO_GPIO
     };
 
-    ESP_ERROR_CHECK(ultrasonic_init(&config));
+    esp_err_t err = ultrasonic_init(&config);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Ultrasonic sensor init failed: %s", esp_err_to_name(err));
+        return;
+    }
 
     ESP_LOGI(TAG, "Ultrasonic sensor initialized successfully");
 }
@@ -149,7 +154,11 @@ void ultrasonic_sensor_init()
 void weight_sensor_init()
 {
     const char *TAG = "WEIGHT_SENSOR_INIT";
-    weight_init();
+    esp_err_t err = weight_init();
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Weight sensor init failed: %s", esp_err_to_name(err));
+        return;
+    }
 
     ESP_LOGI(TAG, "Weight sensor initialized successfully");
 }
