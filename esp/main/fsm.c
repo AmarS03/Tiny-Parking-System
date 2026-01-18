@@ -6,7 +6,6 @@
  */
 
 #include "fsm.h"
-#include "init.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
@@ -22,6 +21,17 @@
 #include "../components/cv/cv.h"
 #include "../components/weight/weight.h"
 #include "../components/https/https.h"
+#include "../components/init/init.h"
+
+// Idle delay function for low power mode
+#ifdef CONFIG_USE_MOCK_CAMERA
+    #define IDLE_DELAY() vTaskDelay(pdMS_TO_TICKS(200))
+#else
+    #define IDLE_DELAY() do { \
+        esp_sleep_enable_timer_wakeup(200000); \
+        esp_light_sleep_start(); \
+    } while(0)
+#endif
 
 static const char *TAG = "Tiny Parking FSM";
 
@@ -111,41 +121,12 @@ void fsm_run_state_function() {
 //////////////// FSM State Functions ///////////////////////////
 ////////////////////////////////////////////////////////////////
 
-void https_task(void *arg)
-{
-    ESP_LOGI(TAG, "HTTPS task started");
-    
-    // TESTING: per vedere se funziona il modulo HTTPS
-    ESP_LOGI(TAG, "----- HTTPS TESTING -----");
-    esp_err_t err = https_init();
-
-    if (err == ESP_OK) {
-        ESP_LOGI(TAG, "HTTPS GET /status succeeded");
-    } else {
-        ESP_LOGE(TAG, "HTTPS GET /status failed: %s", esp_err_to_name(err));
-    } 
-
-    vTaskDelete(NULL);
-}
-
 /**
- * Initializes hardware and other software
- * components
+ * Initializes the whole system
  */
 void init_fn() {
-    hw_init();
-    //other initializations
-    wifi_init();
 
-    xTaskCreate(https_task, "https_init", 8192, NULL, 6, NULL);
-
-    vTaskDelay(pdMS_TO_TICKS(5000));
-
-    xTaskCreate(weight_task, "weight_task", 8192, NULL, 5, NULL);
-
-    //xTaskCreate(recognition_task, "recognition_task", 12288, NULL, 5, &recognition_task_handle);
-
-    cv_task_creator();
+    system_init();
 
     #ifdef CONFIG_USE_MOCK_CAMERA
     ESP_LOGI("IDLE", "Running in MOCK CAMERA mode (Wokwi simulation)");
@@ -164,6 +145,9 @@ void idle_fn() {
     // System waiting for an event
     enable_weight_detection(true);
     recognition_busy = false;
+
+    // Enter low power mode until an interrupt occurs
+    IDLE_DELAY();
 }
 
 /**

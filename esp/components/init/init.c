@@ -7,8 +7,10 @@
 */
 
 #include "init.h"
-#include "../components/wifi/wifi.h"
-#include "../components/weight/weight.h"
+#include "../wifi/wifi.h"
+#include "../weight/weight.h"
+#include "../https/https.h"
+#include "../cv/cv.h"
 
 #include "esp_log.h"
 #include "esp_err.h"
@@ -51,6 +53,27 @@
 #define TRIG_GPIO   GPIO_NUM_42
 #define ECHO_GPIO   GPIO_NUM_41
 
+/**
+ * @brief Initializes the overall system components
+ * and creates necessary tasks
+ */
+void system_init()
+{
+    hw_init();
+    wifi_init();
+
+    xTaskCreate(https_task, "https_init", 8192, NULL, 6, NULL);
+
+    vTaskDelay(pdMS_TO_TICKS(5000));
+
+    xTaskCreate(weight_task, "weight_task", 8192, NULL, 5, NULL);
+
+    cv_task_creator();
+}
+
+/**
+ * @brief Initializes the hardware peripherals
+ */
 void hw_init()
 {
     #ifndef CONFIG_USE_MOCK_CAMERA
@@ -163,6 +186,10 @@ void weight_sensor_init()
     ESP_LOGI(TAG, "Weight sensor initialized successfully");
 }
 
+/**
+ * @brief Initializes the WiFi service and
+ * connects to the configured access point
+ */
 void wifi_init()
 {
     wifi_init_service();

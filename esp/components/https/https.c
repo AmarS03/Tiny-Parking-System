@@ -268,3 +268,20 @@ esp_err_t https_post_exit(const char *json_payload) {
 
     return err;
 }
+
+void https_task(void *arg)
+{
+    ESP_LOGI(TAG, "HTTPS task started");
+    
+    // TESTING: per vedere se funziona il modulo HTTPS
+    ESP_LOGI(TAG, "----- HTTPS TESTING -----");
+    esp_err_t err = https_init();
+
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "HTTPS GET /status succeeded");
+    } else {
+        ESP_LOGE(TAG, "HTTPS GET /status failed: %s", esp_err_to_name(err));
+    } 
+
+    vTaskDelete(NULL);
+}

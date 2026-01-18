@@ -19,16 +19,6 @@
 
 #define TAG "WEIGHT"
 
-// Idle delay function for low power mode
-#ifdef CONFIG_USE_MOCK_CAMERA
-    #define IDLE_DELAY() vTaskDelay(pdMS_TO_TICKS(200))
-#else
-    #define IDLE_DELAY() do { \
-        esp_sleep_enable_timer_wakeup(200000); \
-        esp_light_sleep_start(); \
-    } while(0)
-#endif
-
 // Weight sensor pin definitions
 #define HX711_DOUT_GPIO  GPIO_NUM_1
 #define HX711_CLK_GPIO   GPIO_NUM_2
@@ -241,8 +231,8 @@ void weight_task(void *arg) {
             ESP_LOGI(TAG, "Valid weight detected!");
             fsm_handle_event(VALID_WEIGHT_DETECTED);
         }
-        // Sleep for 200 ms before next reading
-        IDLE_DELAY();
+        // Sleep for 100 ms before next reading
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
