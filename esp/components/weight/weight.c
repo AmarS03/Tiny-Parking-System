@@ -4,7 +4,10 @@
  * Interface used to calibrate and read weight sensor
  * 
  */
+#include "../../main/fsm.h"
+
 #include "weight.h"
+
 #include "hx711.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -12,8 +15,19 @@
 #include "nvs_flash.h"
 #include "nvs.h"
 #include <math.h>
+#include <stdbool.h>
 
 #define TAG "WEIGHT"
+
+// Idle delay function for low power mode
+#ifdef CONFIG_USE_MOCK_CAMERA
+    #define IDLE_DELAY() vTaskDelay(pdMS_TO_TICKS(200))
+#else
+    #define IDLE_DELAY() do { \
+        esp_sleep_enable_timer_wakeup(200000); \
+        esp_light_sleep_start(); \
+    } while(0)
+#endif
 
 // Weight sensor pin definitions
 #define HX711_DOUT_GPIO  GPIO_NUM_1
@@ -38,6 +52,9 @@ static float offset = 0.0f;  // raw offset
 static float baseline = 0;
 static float filtered = 0;
 static int detect_count = 0;
+
+// Weight detection enabled flag
+static volatile bool weight_enabled = false;
 
 
 // Prototypes
@@ -142,7 +159,7 @@ bool weight_detect_vehicle(void)
     float net = raw_weight - baseline;
 
     // EMA filter
-    filtered = filtered * 0.9f + net * 0.1f;
+    filtered = filtered * 0.05f + net * 0.95f;
 
     // Noise rejection
     if (fabsf(filtered) < NOISE_THRESHOLD) {
@@ -195,7 +212,39 @@ void weight_calibrate(float known_weight_g)
 }
 
 
+//////////////////////////////////////////////////////
+//////////////// Weight detection task ///////////////
+//////////////////////////////////////////////////////
 
+void enable_weight_detection(bool enable) {
+    weight_enabled = enable;
+}
+
+/**
+ * Weight detection task
+ * Continuously monitors the weight sensor (since
+ * it can't generate an interrupt directly).
+ * When a valid weight is detected, it triggers
+ * the appropriate FSM event.
+ */
+void weight_task(void *arg) {
+    ESP_LOGI(TAG, "Starting weight detection task...");
+
+    while (1) {
+        // Check if weight detection is enabled
+        if (!weight_enabled) {
+            vTaskDelay(pdMS_TO_TICKS(500));
+            continue;
+        }
+        
+        if (weight_detect_vehicle()) {
+            ESP_LOGI(TAG, "Valid weight detected!");
+            fsm_handle_event(VALID_WEIGHT_DETECTED);
+        }
+        // Sleep for 200 ms before next reading
+        IDLE_DELAY();
+    }
+}
 
 
 

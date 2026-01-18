@@ -26,4 +26,10 @@ char* extract_plate_from_response(void);
 // Extracts view image URL from last API response (caller must free)
 char* extract_image_link_from_response(void);
 
+void recognition_task(void *arg);
+
+void cv_task_creator(void);
+
+void unblock_recognition_task(void);
+
 #endif /* CV_H */

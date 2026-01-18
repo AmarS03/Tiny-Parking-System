@@ -25,4 +25,8 @@ bool weight_detect_vehicle(void);
 // Calibrate the weight sensor with a known weight in grams
 void weight_calibrate(float known_weight_g);
 
+void enable_weight_detection(bool enable);
+
+void weight_task(void *arg);
+
 #endif /* WEIGHT_H */
