@@ -6,7 +6,6 @@
  */
 
 #include "fsm.h"
-#include "init.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
@@ -16,32 +15,31 @@
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_system.h"
-#include "nvs_flash.h"
-#include "esp_http_client.h"
-#include "esp_tls.h"
-#include "esp_heap_caps.h"
-#include "esp_crt_bundle.h"
-
 #include "esp_sleep.h"
 
-#ifndef CONFIG_USE_MOCK_CAMERA
-    #include "esp_camera.h"
-#endif
 
 #include "../components/cv/cv.h"
 #include "../components/weight/weight.h"
 #include "../components/https/https.h"
+#include "../components/init/init.h"
+
+// Idle delay function for low power mode
+#ifdef CONFIG_USE_MOCK_CAMERA
+    #define IDLE_DELAY() vTaskDelay(pdMS_TO_TICKS(200))
+#else
+    #define IDLE_DELAY() do { \
+        esp_sleep_enable_timer_wakeup(200000); \
+        esp_light_sleep_start(); \
+    } while(0)
+#endif
 
 static const char *TAG = "Tiny Parking FSM";
 
-// Mock image embedded (for Wokwi)
-#ifdef CONFIG_USE_MOCK_CAMERA
-extern const uint8_t mock_image_start[] asm("_binary_mock_plate_jpg_start");
-extern const uint8_t mock_image_end[]   asm("_binary_mock_plate_jpg_end");
-#endif
-
 // Current state of the FSM
 static State_t curr_state = INIT;
+
+// Flag that avoids multiple concurrent recognitions
+static bool recognition_busy = false;
 
 // Prototypes of state functions
 static void init_fn();
@@ -123,85 +121,12 @@ void fsm_run_state_function() {
 //////////////// FSM State Functions ///////////////////////////
 ////////////////////////////////////////////////////////////////
 
-void https_task(void *arg)
-{
-    ESP_LOGI(TAG, "HTTPS task started");
-    
-    // TESTING: per vedere se funziona il modulo HTTPS
-    ESP_LOGI(TAG, "----- HTTPS TESTING -----");
-    esp_err_t err = https_init();
-
-    if (err == ESP_OK) {
-        ESP_LOGI(TAG, "HTTPS GET /status succeeded");
-    } else {
-        ESP_LOGE(TAG, "HTTPS GET /status failed: %s", esp_err_to_name(err));
-    } 
-
-    vTaskDelete(NULL);
-}
-
-void recognition_task(void *arg)
-{   
-    ESP_LOGI(TAG, "Plate recognition task started...");
-    
-#ifdef CONFIG_USE_MOCK_CAMERA
-    // MOCK VERSION: Use embedded image
-    size_t image_size = mock_image_end - mock_image_start;
-    ESP_LOGI(TAG, "Using MOCK image (%d bytes)", image_size);
-    prepare_image_payload(mock_image_start, image_size);
-    const char *plate = extract_plate_from_response();
-    const char *image_link = extract_image_link_from_response();
-
-    if (plate != NULL && image_link != NULL) {
-        ESP_LOGI(TAG, "===== PLATE DETECTED: %s =====", plate);
-        ESP_LOGI(TAG, "===== IMAGE LINK: %s =====", image_link);
-    } else {
-        ESP_LOGE(TAG, "Plate recognition failed");
-    }
-    
-    free((void*) plate);
-    free((void*) image_link);
-#else
-    // REAL VERSION: Capture from camera
-    camera_fb_t *fb = esp_camera_fb_get();
-    if (!fb) {
-        ESP_LOGE(TAG, "Camera capture failed");
-        return;
-    }
-    
-    ESP_LOGI(TAG, "Camera captured %d bytes", fb->len);
-    prepare_image_payload(fb->buf, fb->len);
-    const char *plate = extract_plate_from_response();
-    const char *image_link = extract_image_link_from_response();
-
-    if (plate != NULL && image_link != NULL) {
-        ESP_LOGI(TAG, "===== PLATE DETECTED: %s =====", plate);
-        ESP_LOGI(TAG, "===== IMAGE LINK: %s =====", image_link);
-    } else {
-        ESP_LOGE(TAG, "Plate recognition failed");
-    }
-    
-    free((void*) plate);
-    free((void*) image_link);
-    esp_camera_fb_return(fb);
-#endif   
-
-    vTaskDelete(NULL);
-}
-
-
 /**
- * Initializes hardware and other software
- * components
+ * Initializes the whole system
  */
 void init_fn() {
-    hw_init();
-    //other initializations
-    wifi_init();
 
-    xTaskCreate(https_task, "https_init", 8192, NULL, 6, NULL);
-
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    system_init();
 
     #ifdef CONFIG_USE_MOCK_CAMERA
     ESP_LOGI("IDLE", "Running in MOCK CAMERA mode (Wokwi simulation)");
@@ -212,46 +137,17 @@ void init_fn() {
     curr_state = IDLE;
 }
 
-
-void recognition_task(void *arg)
-{
-    ESP_LOGI("RECOGNITION", "Starting recognition task...");
-    capture_and_recognize_plate();
-    ESP_LOGI("RECOGNITION", "Recognition task completed.");
-    vTaskDelete(NULL);
-}
-
 /**
  * When in idle state, the system enters low
  * power mode and waits for interrupts
  */
 void idle_fn() {
-    /** 
-     * Wait for event
-     * wake up every 500ms to check weight sensor
-     */
-    // esp_sleep_enable_timer_wakeup(500000);
-    // esp_light_sleep_start();
+    // System waiting for an event
+    enable_weight_detection(true);
+    recognition_busy = false;
 
-    /**
-     * Mock weight detection logic
-     */
-    static int32_t weight_in_g = 0;
-    static int32_t previous_weight = 0;
-
-    weight_in_g = weight_read();
-
-    if (weight_in_g < 1000 || abs((int32_t)weight_in_g - (int32_t)previous_weight) < 200)  
-    {
-        vTaskDelay(pdMS_TO_TICKS(500));
-    } else {
-        ESP_LOGI("IDLE", "Vehicle detected! Weight: %d g", (int32_t)weight_in_g);
-        vTaskDelay(pdMS_TO_TICKS(500)); // Debounce delay
-        xTaskCreate(recognition_task, "recognition_task", 8192, NULL, 6, NULL);
->>>>>>>>> Temporary merge branch 2
-    }
-    vTaskDelay(pdMS_TO_TICKS(200));
-    previous_weight = weight_in_g;
+    // Enter low power mode until an interrupt occurs
+    IDLE_DELAY();
 }
 
 /**
@@ -259,9 +155,12 @@ void idle_fn() {
  * Decide whether to allow or refuse entrance
  */
 void entry_fn() {
-    vTaskDelay(pdMS_TO_TICKS(500)); // Debounce delay
-    xTaskCreate(recognition_task, "recognition_task", 8192, NULL, 6, NULL);
-    ESP_LOGI("ENTRY", "Running recognition task...");
+    enable_weight_detection(false);
+
+    if (!recognition_busy) {
+        unblock_recognition_task();
+        recognition_busy = true;
+    }
 }
 
 /**
@@ -269,22 +168,28 @@ void entry_fn() {
  * message on the LCD
  */
 void refuse_fn() {
-
+    ESP_LOGI("REFUSE", "Entry refused. Access denied.");
+    vTaskDelay(pdMS_TO_TICKS(5000));
+    curr_state = IDLE;
 }
 
 /**
- * Blinks the LED green, shows a positive message
- * on the LCD and opens the gate bar
+ * Shows a positive message on the
+ * LCD, opens the gate bar and waits a signal
+ * from the ultrasonic sensor to close it again
  */
 void allow_fn() {
+    ESP_LOGI("ALLOW", "Entry allowed. Opening gate...");
+    vTaskDelay(pdMS_TO_TICKS(5000));
     // Open gate bar logic here
 
-    // Go back to IDLE for now
     curr_state = IDLE;
 }
 
 /**
  * Opens the gate bar for vehicle exit
+ * and waits for a signal from the weight 
+ * sensor to close it again
  */
 void exit_fn() {
 

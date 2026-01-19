@@ -62,6 +62,9 @@ static void event_handler(void* arg, esp_event_base_t event_base,
     }
 }
 
+/**
+ * @brief Initialize WiFi as sta and connect to AP
+ */
 void wifi_init_service(void)
 {
     s_wifi_event_group = xEventGroupCreate();

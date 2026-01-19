@@ -7,10 +7,13 @@
 */
 
 #include "init.h"
-#include "../components/wifi/wifi.h"
-#include "../components/weight/weight.h"
+#include "../wifi/wifi.h"
+#include "../weight/weight.h"
+#include "../https/https.h"
+#include "../cv/cv.h"
 
 #include "esp_log.h"
+#include "esp_err.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
@@ -50,6 +53,27 @@
 #define TRIG_GPIO   GPIO_NUM_42
 #define ECHO_GPIO   GPIO_NUM_41
 
+/**
+ * @brief Initializes the overall system components
+ * and creates necessary tasks
+ */
+void system_init()
+{
+    hw_init();
+    wifi_init();
+
+    xTaskCreate(https_task, "https_init", 8192, NULL, 6, NULL);
+
+    vTaskDelay(pdMS_TO_TICKS(5000));
+
+    xTaskCreate(weight_task, "weight_task", 8192, NULL, 5, NULL);
+
+    cv_task_creator();
+}
+
+/**
+ * @brief Initializes the hardware peripherals
+ */
 void hw_init()
 {
     #ifndef CONFIG_USE_MOCK_CAMERA
@@ -141,7 +165,11 @@ void ultrasonic_sensor_init()
         .echo_pin = ECHO_GPIO
     };
 
-    ESP_ERROR_CHECK(ultrasonic_init(&config));
+    esp_err_t err = ultrasonic_init(&config);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Ultrasonic sensor init failed: %s", esp_err_to_name(err));
+        return;
+    }
 
     ESP_LOGI(TAG, "Ultrasonic sensor initialized successfully");
 }
@@ -149,11 +177,19 @@ void ultrasonic_sensor_init()
 void weight_sensor_init()
 {
     const char *TAG = "WEIGHT_SENSOR_INIT";
-    weight_init();
+    esp_err_t err = weight_init();
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Weight sensor init failed: %s", esp_err_to_name(err));
+        return;
+    }
 
     ESP_LOGI(TAG, "Weight sensor initialized successfully");
 }
 
+/**
+ * @brief Initializes the WiFi service and
+ * connects to the configured access point
+ */
 void wifi_init()
 {
     wifi_init_service();

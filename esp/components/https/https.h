@@ -37,4 +37,5 @@ esp_err_t https_post_exit(const char *json_payload);
 // Sends an image to the external API for plate recognition and returns the plate string
 char* plate_recognition_api(const uint8_t *image_data, size_t image_len);
 
+void https_task(void *arg);
 #endif /* HTTPS_H */

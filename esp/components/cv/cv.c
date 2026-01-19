@@ -5,11 +5,15 @@
  * 
  */
 
+#include "../../main/fsm.h"
+
 #include "cv.h"
 #include "esp_http_client.h"
 #include "esp_tls.h"
 #include "esp_crt_bundle.h"
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "esp_log.h"
 #include "esp_err.h"
 #include "esp_crt_bundle.h"
@@ -20,6 +24,18 @@
 #include <sys/param.h>
 #include <stdbool.h>
 
+#ifndef CONFIG_USE_MOCK_CAMERA
+    #include "esp_camera.h"
+#endif
+
+// Mock image embedded (for Wokwi)
+#ifdef CONFIG_USE_MOCK_CAMERA
+extern const uint8_t mock_image_start[] asm("_binary_mock_plate_jpg_start");
+extern const uint8_t mock_image_end[]   asm("_binary_mock_plate_jpg_end");
+#endif
+
+#define YIELD() vTaskDelay(pdMS_TO_TICKS(10))
+
 // License plate API
 #define CV_API_URL "https://www.circuitdigest.cloud/api/v1/readnumberplate"
 #define CV_API_KEY CONFIG_API_KEY
@@ -28,6 +44,7 @@
 static const char *TAG = "CV Module";
 static char api_response_buffer[MAX_HTTP_OUTPUT_BUFFER];
 static int response_len = 0;
+static TaskHandle_t recognition_task_handle = NULL;
 
 // The event handler, which collects and saves 1KB chunks of response data for each HTTPS request
 static esp_err_t http_event_handler(esp_http_client_event_handle_t evt)
@@ -102,6 +119,8 @@ esp_err_t perform_cv_api_request(const char *payload, size_t payload_len)
         .skip_cert_common_name_check = true,
     };
     
+    vTaskDelay(pdMS_TO_TICKS(10));
+
     esp_http_client_handle_t client = esp_http_client_init(&config);
     esp_http_client_set_header(client, "Content-Type", content_type);
     esp_http_client_set_header(client, "Authorization", CV_API_KEY);
@@ -110,6 +129,7 @@ esp_err_t perform_cv_api_request(const char *payload, size_t payload_len)
     // Perform the HTTP POST request and prints the response
     esp_err_t err = esp_http_client_perform(client);
 
+    vTaskDelay(pdMS_TO_TICKS(10));
     // Truncate response buffer to a null-terminated string
     if (response_len < sizeof(api_response_buffer)) {
         api_response_buffer[response_len] = '\0';
@@ -128,7 +148,6 @@ esp_err_t perform_cv_api_request(const char *payload, size_t payload_len)
     } else {
         ESP_LOGE(TAG, "request failed: %s", esp_err_to_name(err));
     }
-
     // Cleans up the HTTPS client
     esp_http_client_cleanup(client);
     
@@ -193,6 +212,8 @@ esp_err_t prepare_image_payload(const uint8_t *image_data, size_t image_len) {
         free(data_header);
         return ESP_ERR_NO_MEM;
     }
+
+    vTaskDelay(pdMS_TO_TICKS(10));
 
     // Build payload with header, image data, and footer
     memcpy(post_data, data_header, data_header_len);
@@ -263,4 +284,88 @@ char* extract_image_link_from_response(void) {
 
     cJSON_Delete(root);
     return image_link;
+}
+
+////////////////////////////////////////////////
+/////////////// CV task ////////////////////////
+////////////////////////////////////////////////
+
+
+void cv_task_creator(void) {
+    xTaskCreatePinnedToCore(
+        recognition_task,
+        "recognition_task",
+        12288,
+        NULL,
+        tskIDLE_PRIORITY + 1,
+        &recognition_task_handle,
+        1
+    );
+}
+
+void unblock_recognition_task(void) {
+    if (recognition_task_handle != NULL) {
+        xTaskNotifyGive(recognition_task_handle);
+    }
+}
+
+
+/**
+ * Plate recognition task
+ * Waits for notification from weight task,
+ * then captures image and sends to CV API.
+ * The use of task notification allows to
+ * efficiently block/unblock the task without
+ * busy waiting and is generally more lightweight
+ * than using semaphores or event groups.
+ * Based on the result of the recognition, it
+ * triggers the appropriate FSM event.
+ */
+void recognition_task(void *arg)
+{   
+    while (1) {
+        // Block until weight detection signals entry
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+        ESP_LOGI(TAG, "Plate recognition task started...");
+        
+    #ifdef CONFIG_USE_MOCK_CAMERA
+        // MOCK VERSION: Use embedded image
+        size_t image_size = mock_image_end - mock_image_start;
+        ESP_LOGI(TAG, "Using MOCK image (%d bytes)", image_size);
+        prepare_image_payload(mock_image_start, image_size);
+    #else
+        // REAL VERSION: Capture from camera
+        camera_fb_t *fb = esp_camera_fb_get();
+        if (!fb) {
+            ESP_LOGE(TAG, "Camera capture failed");
+            return;
+        }
+        
+        ESP_LOGI(TAG, "Camera captured %d bytes", fb->len);
+        prepare_image_payload(fb->buf, fb->len);
+    #endif
+        YIELD();
+        const char *plate = extract_plate_from_response();
+        YIELD();
+        const char *image_link = extract_image_link_from_response();
+
+        if (plate != NULL && image_link != NULL) {
+            ESP_LOGI(TAG, "===== PLATE DETECTED: %s =====", plate);
+            ESP_LOGI(TAG, "===== IMAGE LINK: %s =====", image_link);
+
+            fsm_handle_event(PLATE_RECOGNIZED);
+        } else {
+            ESP_LOGE(TAG, "Plate recognition failed");
+
+            fsm_handle_event(PLATE_REFUSED);
+        }
+        
+        free((void*) plate);
+        free((void*) image_link);
+
+    #ifndef CONFIG_USE_MOCK_CAMERA
+        esp_camera_fb_return(fb);
+    #endif
+    }
 }
