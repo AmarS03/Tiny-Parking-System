@@ -11,6 +11,7 @@
 #include "../weight/weight.h"
 #include "../https/https.h"
 #include "../cv/cv.h"
+#include "../servo_motor/servo_motor.h"
 
 #include "esp_log.h"
 #include "esp_err.h"
@@ -53,6 +54,11 @@
 #define TRIG_GPIO   GPIO_NUM_42
 #define ECHO_GPIO   GPIO_NUM_41
 
+// Servo motor pin definition
+#define SERVO_PWM_GPIO   GPIO_NUM_14
+#define SERVO_ANGLE_DOWN 0
+#define SERVO_ANGLE_UP   90
+
 /**
  * @brief Initializes the overall system components
  * and creates necessary tasks
@@ -81,6 +87,7 @@ void hw_init()
     #endif
     ultrasonic_sensor_init();
     weight_sensor_init();
+    servo_init();
 }
 
 static void rgb_off(void) {
@@ -184,6 +191,15 @@ void weight_sensor_init()
     }
 
     ESP_LOGI(TAG, "Weight sensor initialized successfully");
+}
+
+void servo_init(void)
+{
+    servo_motor_init(&(servo_motor_params_t){
+        .gpio_pwm = SERVO_PWM_GPIO,
+        .angle_up_deg = SERVO_ANGLE_UP,
+        .angle_down_deg = SERVO_ANGLE_DOWN,
+    });
 }
 
 /**

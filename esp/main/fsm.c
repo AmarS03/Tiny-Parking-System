@@ -22,6 +22,7 @@
 #include "../components/weight/weight.h"
 #include "../components/https/https.h"
 #include "../components/init/init.h"
+#include "../components/servo_motor/servo_motor.h"
 
 // Idle delay function for low power mode
 #ifdef CONFIG_USE_MOCK_CAMERA
@@ -65,7 +66,8 @@ void fsm_handle_event(Event_t event) {
     switch (curr_state) {
         case IDLE:
             if (event == VALID_WEIGHT_DETECTED) {
-                curr_state = VEHICLE_ENTRY;
+                // curr_state = VEHICLE_ENTRY;
+                curr_state = ENTRY_ALLOWED;
             } else if (event == EXIT_DETECTED) {
                 curr_state = VEHICLE_EXIT;
             } else if (event == REMOTE_OPEN) {
@@ -180,9 +182,13 @@ void refuse_fn() {
  */
 void allow_fn() {
     ESP_LOGI("ALLOW", "Entry allowed. Opening gate...");
+    // raise the barrier when entry is allowed
+    servo_motor_raise_barrier();
+    // wait for some time to allow vehicle to pass
     vTaskDelay(pdMS_TO_TICKS(5000));
-    // Open gate bar logic here
-
+    // clsose the barrier after delay
+    servo_motor_lower_barrier();
+    
     curr_state = IDLE;
 }
 
@@ -192,6 +198,17 @@ void allow_fn() {
  * sensor to close it again
  */
 void exit_fn() {
+    ESP_LOGI("ALLOW", "Exit allowed. Opening gate...");
+    //raise the barrier when vehicle exit is detected
+    servo_motor_raise_barrier();
+    // wait for some time to allow vehicle to pass
+    vTaskDelay(pdMS_TO_TICKS(5000));
+    // clsose the barrier after delay
+    servo_motor_lower_barrier();
+    
+    curr_state = IDLE;
+    
+
 
 }
 
@@ -201,5 +218,7 @@ void exit_fn() {
  */
 void closed_fn() {
 
+    // close the barrier when the system force closes
+    servo_motor_raise_barrier();
 }
 

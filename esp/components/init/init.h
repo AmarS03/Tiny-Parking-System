@@ -22,5 +22,6 @@ void weight_sensor_init();
 
 void wifi_init();
 
+void servo_init(void);
 
 #endif /* INIT_H */
