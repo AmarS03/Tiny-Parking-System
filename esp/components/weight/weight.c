@@ -190,7 +190,7 @@ void weight_calibrate(float known_weight_g)
     offset = raw_empty;
 
     ESP_LOGI(TAG, "Place %.1f g on the scale", known_weight_g);
-    vTaskDelay(pdMS_TO_TICKS(3000));
+    vTaskDelay(pdMS_TO_TICKS(5000));
 
     hx711_read_average(&hx, 15, &raw_loaded);
 
@@ -199,6 +199,7 @@ void weight_calibrate(float known_weight_g)
     save_calibration();
 
     ESP_LOGI(TAG, "Calibration complete: scale=%.6f", scale);
+    ESP_LOGI(TAG, "Restart the device to apply new calibration");
 }
 
 

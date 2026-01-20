@@ -1,5 +1,12 @@
 menu "Project Configuration"
 
+    config WEIGHT_CALIBRATION
+        bool "Enable weight calibration"
+        default n
+        help
+            Enable this option to perform weight calibration before using the scale.
+            Disable this option to use predefined calibration values.
+
     config USE_MOCK_CAMERA
         bool "Use mock camera (for Wokwi simulation)"
         default n
