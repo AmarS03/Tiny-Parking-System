@@ -12,6 +12,7 @@
 #include "freertos/task.h"
 
 #include "fsm.h"
+#include "../components/weight/weight.h"
 
 /**
  * FSM Task
@@ -26,7 +27,27 @@ void fsm_task(void *arg)
     }
 }
 
+#ifdef CONFIG_WEIGHT_CALIBRATION
+/**
+ * Calibration Task
+ * This task performs weight calibration at startup.
+ * It's meant to be run once and then deleted.
+ */
+void calibration_task(void *arg)
+{
+    weight_init();
+    // Perform weight calibration with a known weight of 1000 grams
+    weight_calibrate(1000.0f);
+    vTaskDelete(NULL); // Delete this task after calibration
+}
+#endif
+
 
 void app_main(void) {
+    #ifdef CONFIG_WEIGHT_CALIBRATION
+    // Start calibration task
+    xTaskCreate(calibration_task, "calibration_task", 8192, NULL, 5, NULL);
+    #endif
+
     xTaskCreate(fsm_task, "fsm_task", 8192, NULL, 5, NULL);
 }

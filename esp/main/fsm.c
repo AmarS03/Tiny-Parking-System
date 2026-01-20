@@ -66,8 +66,7 @@ void fsm_handle_event(Event_t event) {
     switch (curr_state) {
         case IDLE:
             if (event == VALID_WEIGHT_DETECTED) {
-                // curr_state = VEHICLE_ENTRY;
-                curr_state = ENTRY_ALLOWED;
+                curr_state = VEHICLE_ENTRY;
             } else if (event == EXIT_DETECTED) {
                 curr_state = VEHICLE_EXIT;
             } else if (event == REMOTE_OPEN) {
