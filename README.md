@@ -53,6 +53,8 @@ Our work is based on everything we have learned in the last 3 years, but most im
 
 ![alt text](https://i.ibb.co/60hX7Tm1/diagram.png)
 
+A finite state machine handles the behaviour of the whole system as a separate, non-blocking task. The FSM manages state transitions based on sensor events (such as vehicle detection, license plate recognition, and exit signals) and controls the barrier, LED indicators, and display updates accordingly. The system optimizes power consumption by entering a low-power sleep mode when idle and only activating the computer vision processing when a vehicle is detected at the entrance.
+
 ### General features
 
 - A dispositivo LED RGB (green/red/blue) will indicate in real-time the availability of parking spaces: the LED will be green when free spots are available, red when the parking lot is full, and blue if the object entering is not a car.
@@ -99,24 +101,46 @@ Our work is based on everything we have learned in the last 3 years, but most im
 ```
 Tiny-Parking-System
 ├── esp/
-|   ├── components/           # Custom project components
-|   |   ├── weight/           
+|   ├── components/            # Custom project components
+|   |   ├── cv/
+|   |   ├── https/
+|   |   ├── init/
+|   |   ├── servo_motor/
+|   |   ├── weight/
 |   |   └── wifi/
-│   ├── main/                 # Main application files
-│   └── diagram.json          # Wokwi diagram components
+│   ├── main/                  # Main application files
+|   |   ├── fsm.c              
+|   |   ├── idf_component.yml  # Includes third party libs
+|   |   ├── Kconfig.projbuild  # Custom configuration
+|   |   └── main.c             
+│   └── diagram.json           # Wokwi diagram components
 └── web-service/
     ├── api
-    │   ├── app.js            # Main API code
-    │   └── package.json      # Express.js dependencies
+    │   ├── app.js             # Main API code
+    │   └── package.json       # Express.js dependencies
     └── frontend/
         ├── app/
         ├── components/
         ├── hooks/
         ├── lib/
         ├── public/
-        └── package.json      # React and Next.js dependencies
+        └── package.json       # React and Next.js dependencies
 ```
-The project follows a service oriented architecture: it uses the component manager provided by ESP-IDF to interact with external driver libraries, which are included in  [idf_component.yml](esp/main/idf_component.yml), and exploits the build system to integrate the developed [components](esp/components/) via CMake. These approach guarantees scalability and modularity for future development.
+### Project Architecture
+
+The project follows a service-oriented architecture using the ESP-IDF component manager to integrate external driver libraries listed in [`idf_component.yml`](esp/main/idf_component.yml). The build system leverages CMake to incorporate custom [`components`](esp/components/), ensuring scalability and modularity for future development.
+
+#### Dependencies
+
+The project utilizes the following third-party libraries:
+
+| Library | Purpose |
+| -- | -- |
+| `espressif/esp32-camera` | Camera interface for computer vision |
+| `esp-idf-lib/ultrasonic` | Ultrasonic sensor for vehicle detection |
+| `esp-idf-lib/hx711` | Weight sensor for vehicle classification |
+| `espressif/cjson` | JSON parsing for API communication |
+| `espressif/servo` | Servo motor for the parking barrier
 
 ### API model:
 
@@ -154,7 +178,34 @@ Before getting started, ensure that you have the following installed:
   ```
 
 ### 2. Setting up the circuit
+#### Pinout
+| Component | GPIO Pin |
+| -- | -- |
+| Camera PWDN | GPIO 38 |
+| Camera VSYNC | GPIO 6 |
+| Camera HREF | GPIO 7 |
+| Camera PCLK | GPIO 13 |
+| Camera XCLK | GPIO 15 |
+| Camera SDA | GPIO 4 |
+| Camera SCL | GPIO 5 |
+| Camera D0-D7 | GPIO 11, 9, 8, 10, 12, 18, 17, 16 |
+| LED Red | GPIO 6 |
+| LED Green | GPIO 7 |
+| LED Blue | GPIO 8 |
+| Ultrasonic TRIG | GPIO 42 |
+| Ultrasonic ECHO | GPIO 41 |
+| Weight Sensor DOUT | GPIO 1 |
+| Weight Sensor CLK | GPIO 2 |
+| Servo Motor PWM | GPIO 14 |
+
 ...
+
+...
+
+#### Weight Calibration
+ - The project provides a code stub for the weight sensor calibration. It requires the user to place an object of known weight on the platform when prompted and wait for the process to finish.
+ - The offset is stored in an NVS partition and it's loaded each time the application is run.
+ - In order to run the calibration code, go to Project Configuration in [menuconfig]() and enable the Weight Calibration flag.
 
 ### 3. Configure the ESP-IDF framework
 - Download the ESP-IDF framework A complete guide can be found [here](https://docs.espressif.com/projects/esp-idf/en/v5.5.2/esp32s3/get-started/index.html).
