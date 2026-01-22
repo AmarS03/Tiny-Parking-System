@@ -25,7 +25,14 @@
       "left": -304.6,
       "attrs": { "type": "5kg" }
     },
-    { "type": "wokwi-servo", "id": "servo1", "top": 324.4, "left": -19.2, "attrs": {} },
+    { 
+      "type": "wokwi-servo", 
+      "id": "servo1", 
+      "top": 350, 
+      "left": -19.2, 
+      "rotate": 270,
+      "attrs": {} 
+    },
     {
       "type": "board-ssd1306",
       "id": "oled1",

@@ -20,6 +20,7 @@
 
 #include "../components/cv/cv.h"
 #include "../components/weight/weight.h"
+#include "../components/ultrasonic_sensor/ultrasonic_sensor.h"
 #include "../components/https/https.h"
 #include "../components/init/init.h"
 #include "../components/servo_motor/servo_motor.h"
@@ -33,8 +34,6 @@
         esp_light_sleep_start(); \
     } while(0)
 #endif
-
-static const char *TAG = "Tiny Parking FSM";
 
 // Current state of the FSM
 static State_t curr_state = INIT;
@@ -66,7 +65,8 @@ void fsm_handle_event(Event_t event) {
     switch (curr_state) {
         case IDLE:
             if (event == VALID_WEIGHT_DETECTED) {
-                curr_state = VEHICLE_ENTRY;
+                // curr_state = VEHICLE_ENTRY;
+                curr_state = ENTRY_ALLOWED; // TEMPORARY: Skip recognition for testing
             } else if (event == EXIT_DETECTED) {
                 curr_state = VEHICLE_EXIT;
             } else if (event == REMOTE_OPEN) {
@@ -149,6 +149,12 @@ void idle_fn() {
 
     // Enter low power mode until an interrupt occurs
     IDLE_DELAY();
+
+    // wait for the ultrasonic sensor to detect vehicle passage
+    if (ultrasonic_sensor_detect()) {
+        ESP_LOGI("IDLE", "Detected vehicle exiting...");
+        fsm_handle_event(EXIT_DETECTED);
+    }
 }
 
 /**
@@ -181,12 +187,32 @@ void refuse_fn() {
  */
 void allow_fn() {
     ESP_LOGI("ALLOW", "Entry allowed. Opening gate...");
+
     // raise the barrier when entry is allowed
     servo_motor_raise_barrier();
-    // wait for some time to allow vehicle to pass
-    vTaskDelay(pdMS_TO_TICKS(5000));
-    // clsose the barrier after delay
+
+    // wait for the ultrasonic sensor to detect vehicle passage
+    bool is_still_detecting = false;
+
+    // Await vehicle passage
+    while (!is_still_detecting) {
+        is_still_detecting = ultrasonic_sensor_detect();
+        vTaskDelay(pdMS_TO_TICKS(200));
+    }
+
+    ESP_LOGI("ALLOW", "Vehicle passing the gate...");
+
+    // Await vehicle clearance
+    while (is_still_detecting) {
+        is_still_detecting = ultrasonic_sensor_detect();
+        vTaskDelay(pdMS_TO_TICKS(200));
+    }
+
+    ESP_LOGI("ALLOW", "Vehicle passed. Closing gate...");
+    
+    // close the barrier after ultrasonic read
     servo_motor_lower_barrier();
+    vTaskDelay(pdMS_TO_TICKS(3000));
     
     curr_state = IDLE;
 }
@@ -197,18 +223,23 @@ void allow_fn() {
  * sensor to close it again
  */
 void exit_fn() {
-    ESP_LOGI("ALLOW", "Exit allowed. Opening gate...");
+    ESP_LOGI("EXIT", "Exit allowed. Opening gate...");
+
     //raise the barrier when vehicle exit is detected
     servo_motor_raise_barrier();
-    // wait for some time to allow vehicle to pass
-    vTaskDelay(pdMS_TO_TICKS(5000));
+
+    // wait for some time to allow vehicle to exit
+    vTaskDelay(pdMS_TO_TICKS(10000));
+
     // clsose the barrier after delay
     servo_motor_lower_barrier();
+
+    // wait for some time to allow vehicle to exit
+    vTaskDelay(pdMS_TO_TICKS(3000));
+    
+    ESP_LOGI("EXIT", "Vehicle passed. Closing gate...");
     
     curr_state = IDLE;
-    
-
-
 }
 
 /**

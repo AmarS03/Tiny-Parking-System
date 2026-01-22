@@ -7,10 +7,11 @@
 */
 
 #include "init.h"
-#include "../wifi/wifi.h"
-#include "../weight/weight.h"
-#include "../https/https.h"
 #include "../cv/cv.h"
+#include "../https/https.h"
+#include "../ultrasonic_sensor/ultrasonic_sensor.h"
+#include "../weight/weight.h"
+#include "../wifi/wifi.h"
 #include "../servo_motor/servo_motor.h"
 
 #include "esp_log.h"
@@ -20,7 +21,6 @@
 #include "esp_system.h"
 #include "driver/gpio.h"
 #include <esp_idf_lib_helpers.h>
-#include "ultrasonic.h"
 
 #ifndef CONFIG_USE_MOCK_CAMERA
 
@@ -49,10 +49,6 @@
 #define LED_R_GPIO  GPIO_NUM_6
 #define LED_G_GPIO  GPIO_NUM_7
 #define LED_B_GPIO  GPIO_NUM_8
-
-// Ultrasonic sensor pin definitions
-#define TRIG_GPIO   GPIO_NUM_42
-#define ECHO_GPIO   GPIO_NUM_41
 
 // Servo motor pin definition
 #define SERVO_PWM_GPIO   GPIO_NUM_14
@@ -163,23 +159,6 @@ void camera_init()
 
 }
 #endif
-
-void ultrasonic_sensor_init()
-{
-    const char *TAG = "ULTRASONIC_SENSOR_INIT";
-    static ultrasonic_sensor_t config = {
-        .trigger_pin = TRIG_GPIO,
-        .echo_pin = ECHO_GPIO
-    };
-
-    esp_err_t err = ultrasonic_init(&config);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Ultrasonic sensor init failed: %s", esp_err_to_name(err));
-        return;
-    }
-
-    ESP_LOGI(TAG, "Ultrasonic sensor initialized successfully");
-}
 
 void weight_sensor_init()
 {
