@@ -1,5 +1,5 @@
 const express = require("express");
-const { getStore, setBoardStatus, addLog, addNewLog } = require("../lib/data");
+const { getStore, setBoardStatus, addLog, addNewLog, addLogSubscriber } = require("../lib/data");
 
 const router = express.Router();
 
@@ -17,6 +17,35 @@ router.get("/", (req, res, next) => {
     }
 });
 
+// GET /status/logs/stream - SSE endpoint for real-time log updates
+router.get("/logs/stream", (req, res, next) => {
+    try {
+        // Set SSE headers
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        
+        // Add this client as a subscriber
+        const cleanup = addLogSubscriber(res);
+        
+        // Send initial logs
+        const store = getStore();
+        store.logs.forEach(log => {
+            res.write(`data: ${JSON.stringify(log)}\n\n`);
+        });
+        
+        // Handle client disconnect
+        req.on('close', () => {
+            cleanup();
+            res.end();
+        });
+    } catch (err) {
+        addNewLog("error", `SSE connection error: ${err.message}`);
+        next(err);
+    }
+});
+
 // PUT /status - initialize or update board status
 router.put("/", (req, res, next) => {
     try {
@@ -28,8 +57,8 @@ router.put("/", (req, res, next) => {
             throw err;
         } else {
             setBoardStatus(updatedStatus);
-            addNewLog("info", "System status updated recently");
-            res.json({ message: "System status updated successfully" });
+            addNewLog("info", "System started");
+            res.json({ message: "System started" });
         }
     } catch (err) {
 		addNewLog(

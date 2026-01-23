@@ -11,6 +11,7 @@
 #include "esp_err.h"
 #include "esp_http_client.h"
 #include <stdint.h>
+#include <stdbool.h>
 #include <stddef.h>
 
 // Generic method used to perform a REST API request to a specific URL
@@ -25,11 +26,8 @@ esp_err_t https_get_status(void);
 // Performs a PUT request to /status with a JSON payload
 esp_err_t https_put_status(const char *json_payload);
 
-// Performs a POST to /entry with a JSON payload and returns the entryId
-char* https_post_entry(const char *json_payload);
-
-// Performs a POST to /entry/{entryID} with a JSON payload, passing the entryId in the URL path
-esp_err_t https_post_entry_id(const char *entry_id, const char *json_payload);
+// Performs a POST to /entry with a JSON payload and returns if the entry was allowed or not
+bool https_post_entry(const char *json_payload);
 
 // Performs a POST to /exit with a JSON payload
 esp_err_t https_post_exit(const char *json_payload);

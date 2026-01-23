@@ -65,8 +65,8 @@ void fsm_handle_event(Event_t event) {
     switch (curr_state) {
         case IDLE:
             if (event == VALID_WEIGHT_DETECTED) {
-                // curr_state = VEHICLE_ENTRY;
-                curr_state = ENTRY_ALLOWED; // TEMPORARY: Skip recognition for testing
+                curr_state = VEHICLE_ENTRY;
+                // curr_state = ENTRY_ALLOWED; // TEMPORARY: Skip recognition for testing
             } else if (event == EXIT_DETECTED) {
                 curr_state = VEHICLE_EXIT;
             } else if (event == REMOTE_OPEN) {
@@ -126,7 +126,6 @@ void fsm_run_state_function() {
  * Initializes the whole system
  */
 void init_fn() {
-
     system_init();
 
     #ifdef CONFIG_USE_MOCK_CAMERA
