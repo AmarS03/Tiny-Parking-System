@@ -13,6 +13,7 @@
 #include "../weight/weight.h"
 #include "../wifi/wifi.h"
 #include "../servo_motor/servo_motor.h"
+#include "../oled/oled.h"
 
 #include "esp_log.h"
 #include "esp_err.h"
@@ -20,6 +21,7 @@
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "driver/gpio.h"
+#include "driver/i2c_master.h"
 #include <esp_idf_lib_helpers.h>
 
 #ifndef CONFIG_USE_MOCK_CAMERA
@@ -57,9 +59,8 @@
 void system_init()
 {
     wifi_init();
-    hw_init();
 
-    // xTaskCreate(https_task, "https_init", 8192, NULL, 6, NULL);
+    hw_init();
 
     vTaskDelay(pdMS_TO_TICKS(5000));
 
@@ -78,35 +79,10 @@ void hw_init()
     #endif
     ultrasonic_sensor_init();
     weight_sensor_init();
-    // servo_init();
+    oled_init(I2C_NUM_0);
+    servo_init();
 }
 
-// static void rgb_off(void) {
-//     gpio_set_level(LED_R_GPIO, 1);
-//     gpio_set_level(LED_G_GPIO, 1);
-//     gpio_set_level(LED_B_GPIO, 1);
-// }
-
-// static void rgb_green(void) {
-//     gpio_set_level(LED_R_GPIO, 1);
-//     gpio_set_level(LED_G_GPIO, 0);
-//     gpio_set_level(LED_B_GPIO, 1);
-// }
-
-// static void rgb_blue(void) {
-//     gpio_set_level(LED_R_GPIO, 1);
-//     gpio_set_level(LED_G_GPIO, 1);
-//     gpio_set_level(LED_B_GPIO, 0);
-// }
-
-// static void rgb_init(void) {
-//     gpio_config_t io = {0};
-//     io.pin_bit_mask = (1ULL << LED_R_GPIO) | (1ULL << LED_G_GPIO) | (1ULL << LED_B_GPIO);
-//     io.mode = GPIO_MODE_OUTPUT;
-//     io.intr_type = GPIO_INTR_DISABLE;
-//     gpio_config(&io);
-//     rgb_off();
-// }
 
 #ifndef CONFIG_USE_MOCK_CAMERA
 void camera_init()

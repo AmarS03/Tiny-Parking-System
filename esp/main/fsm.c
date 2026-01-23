@@ -25,6 +25,7 @@
 #include "../components/https/https.h"
 #include "../components/init/init.h"
 #include "../components/servo_motor/servo_motor.h"
+#include "../components/oled/oled.h"
 
 // Idle delay function for low power mode
 #ifdef CONFIG_USE_MOCK_CAMERA
@@ -135,6 +136,19 @@ void init_fn() {
 
     ESP_LOGI("INIT", "System ready. Waiting for detection...");
 
+    vTaskDelay(pdMS_TO_TICKS(2000));
+
+    ESP_LOGI("INIT", "Displaying status on OLED...");
+
+
+    oled_print(0, "ESP32-S3 READY");
+    oled_print(2, "HX711 OK");
+    oled_print(4, "WiFi CONNECTED");
+
+    vTaskDelay(pdMS_TO_TICKS(5000));
+
+    oled_clear();
+
     curr_state = IDLE;
 }
 
@@ -144,7 +158,7 @@ void init_fn() {
  */
 void idle_fn() {
     // System waiting for an event
-    //enable_weight_detection(true);
+    enable_weight_detection(true);
     recognition_busy = false;
 
     // Enter low power mode until an interrupt occurs
