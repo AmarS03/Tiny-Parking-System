@@ -1,15 +1,15 @@
 "use client";
 
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { AlertCircle, Info, FileText, CheckCircle2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export interface logMessage {
     timestamp: string;
     message: string;
     imageUrl?: string;
     type: 'info' | 'success' | 'warning' | 'error';
-}
+};
 
 const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -21,22 +21,76 @@ const formatDate = (dateString: string) => {
     return `${day}/${month}/${year} - ${time}`;
 };
 
+function getTimeDifference(timestamp: string): string {
+    const now = new Date();
+    const updated = new Date(timestamp);
+    const diffMs = now.getTime() - updated.getTime();
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffSeconds < 60) return 'just now';
+    if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `over ${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+};
+
 export function SystemLogSection() {
-    // We will read a shared key "activity_log"
-    // Note: Writing to this log from OTHER components requires them to use the same hook
-    const logs: logMessage[] = [
-        { timestamp: new Date().toISOString(), message: "System initialized.", type: 'info' },
-        { timestamp: new Date().toISOString(), message: "User logged in.", type: 'success' },
-        { timestamp: new Date().toISOString(), message: "Low battery.", type: 'warning' },
-        { timestamp: new Date().toISOString(), message: "Unable to connect to server.", type: 'error' },
-        { timestamp: new Date().toISOString(), message: "Unable to initialize.", type: 'error' },
-        { 
-            timestamp: new Date().toISOString(), 
-            message: "Vehicle entering detected. License Plate: ABC-1234", 
-            imageUrl: "https://www.circuitdigest.cloud/static/anpr_uploads/anpr_142e06c40989_20260122_161010_032.jpeg", 
-            type: 'info' 
-        }
-    ];
+    const [logs, setLogs] = useState<logMessage[]>([]);
+    const [lastUpdated, setLastUpdated] = useState<string>('');
+    const [timeDifference, setTimeDifference] = useState<string>('Awaiting data...');
+
+    useEffect(() => {
+        // Fetch initial logs from API
+        const fetchInitialLogs = async () => {
+            try {
+                const response = await fetch('https://tinyparkingsystem-api.vercel.app/status');
+                const data = await response.json();
+                setLogs(data.logs || []);
+                setLastUpdated(new Date(data.lastUpdatedAt).toLocaleString('it-IT'));
+                setTimeDifference(getTimeDifference(data.lastUpdatedAt));
+            } catch (error) {
+                console.error('Failed to fetch initial logs:', error);
+                setLogs([
+                    { timestamp: new Date().toISOString(), message: 'Unable to connect to API', type: 'error' },
+                ]);
+            }
+        };
+
+        fetchInitialLogs();
+
+        // Connect to SSE stream for real-time updates
+        const eventSource = new EventSource('https://tinyparkingsystem-api.vercel.app/status/logs/stream');
+        
+        eventSource.onmessage = (event) => {
+            try {
+                const newLog = JSON.parse(event.data) as logMessage;
+                setLogs(prevLogs => [...prevLogs, newLog]);
+                setLastUpdated(new Date(newLog.timestamp).toLocaleString('it-IT'));
+                setTimeDifference(getTimeDifference(newLog.timestamp));
+            } catch (error) {
+                console.error('Failed to parse SSE message:', error);
+            }
+        };
+
+        eventSource.onerror = () => {
+            console.error('SSE connection error');
+            eventSource.close();
+        };
+
+        // Update time difference every minute
+        const interval = setInterval(() => {
+            if (logs.length > 0) {
+                setTimeDifference(getTimeDifference(logs[logs.length - 1].timestamp));
+            }
+        }, 60000);
+
+        return () => {
+            eventSource.close();
+            clearInterval(interval);
+        };
+    }, []);
 
     const getIcon = (type: logMessage['type']) => {
         switch (type) {
@@ -90,7 +144,12 @@ export function SystemLogSection() {
                                         {log.message}
                                     </span>
                                     {log.imageUrl && (
-                                        <img src={log.imageUrl} alt="Log preview" className="h-64" />
+                                        <img 
+                                            src={log.imageUrl} 
+                                            alt="Log preview" 
+                                            className="h-64"
+                                            crossOrigin="anonymous"
+                                        />
                                     )}
                                 </div>
                             </div>

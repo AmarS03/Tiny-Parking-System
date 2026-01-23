@@ -24,12 +24,12 @@ function getTimeDifference(timestamp: string): string {
     if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
     if (diffHours < 24) return `over ${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
     return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
-}
+};
 
 export function SystemStatusSection() {
     const [sensors, setSensors] = useState<SensorStatus[]>([]);
     const [lastUpdated, setLastUpdated] = useState<string>('');
-    const [timeDifference, setTimeDifference] = useState<string>('');
+    const [timeDifference, setTimeDifference] = useState<string>('Awaiting data...');
 
     useEffect(() => {
         const fetchStatus = async () => {
@@ -52,7 +52,7 @@ export function SystemStatusSection() {
         };
 
         fetchStatus();
-        const interval = setInterval(fetchStatus, 60000); // Refreshes every minute
+        const interval = setInterval(fetchStatus, 10000); // Refreshes every 10 seconds
         return () => clearInterval(interval);
     }, []);
 
