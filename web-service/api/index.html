@@ -46,6 +46,16 @@
             padding: 15px;
             margin: 10px 0;
             border-radius: 4px;
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+        
+        .endpoint[data-href] {
+            cursor: pointer;
+        }
+        
+        .endpoint[data-href]:hover {
+            background: #e9ecef;
+            transform: translateX(4px);
         }
         
         .method {
@@ -93,7 +103,7 @@
             background: #ecf0f1;
             padding: 20px 30px;
             text-align: center;
-            color: #666;
+            color: #6b6b6b;
             font-size: 0.9em;
         }
     </style>
@@ -122,7 +132,7 @@
                     </p>
                 </div>
                 
-                <div class="endpoint" href="/status">
+                <div class="endpoint" data-href="/status">
                     <span class="method get">
                         GET
                     </span>
@@ -134,7 +144,7 @@
                     </p>
                 </div>
                 
-                <div class="endpoint" href="/status">
+                <div class="endpoint" data-href="/status">
                     <span class="method put">
                         PUT
                     </span>
@@ -146,7 +156,7 @@
                     </p>
                 </div>
                 
-                <div class="endpoint" href="/entry">
+                <div class="endpoint" data-href="/entry">
                     <span class="method post">
                         POST
                     </span>
@@ -154,24 +164,12 @@
                         /entry
                     </code>
                     <p>
-                        Records a vehicle entering the parking system and returns an entryID
+                        Records a vehicle entering the parking system and returns the entry decision"
                     </p>
                 </div>
                 
-                <div class="endpoint" href="/entry">
+                <div class="endpoint" data-href="/exit">
                     <span class="method post">
-                        POST
-                    </span>
-                    <code>
-                        /entry/{entryID}
-                    </code>
-                    <p>
-                        Records the result of a specific parking entry request (allowed/denied)
-                    </p>
-                </div>
-                
-                <div class="endpoint" href="/exit">
-                    <span class="method post" htr>
                         POST
                     </span>
                     <code>
@@ -192,5 +190,14 @@
             </p>
         </footer>
     </div>
+
+    <script>
+        // Make endpoint divs clickable
+        document.querySelectorAll('.endpoint[data-href]').forEach(endpoint => {
+            endpoint.addEventListener('click', function() {
+                window.location.href = this.getAttribute('data-href');
+            });
+        });
+    </script>
 </body>
 </html>

@@ -3,8 +3,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CarFront } from 'lucide-react';
-import { useDashboard } from '@/components/dashboard-provider';
+import { CarFront, TextSearchIcon } from 'lucide-react';
 
 export interface ParkingSpot {
     id: number;
@@ -12,7 +11,7 @@ export interface ParkingSpot {
     licensePlate?: string;
 }
 
-export function ParkingLotCard() {
+export function ParkingLotSection() {
     const { spots, toggleSpot } = useDashboard();
 
     const occupiedCount = spots.filter(s => s.occupied).length;

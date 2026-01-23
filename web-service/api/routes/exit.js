@@ -1,30 +1,48 @@
-const express = require('express')
-const router = express.Router()
-const { store, getSpots } = require('../lib/data')
+const express = require("express");
+const { store } = require("../lib/data");
+
+const router = express.Router();
 
 // POST /exit - mark spot as freed by license plate (simple helper endpoint)
-router.post('/', (req, res, next) => {
-  try {
-    const { licensePlate, timestamp } = req.body
-    if (!licensePlate) {
-      const err = new Error('Invalid exit payload')
-      err.status = 400
-      throw err
+router.post("/", (req, res, next) => {
+    try {
+        const { licensePlate } = req.body;
+	
+        if (!licensePlate) {
+            const err = new Error("Invalid exit payload (no license plate)");
+            err.status = 400;
+            throw err;
+        }
+		
+		addNewLog(
+			"info", 
+			`Vehicle exit detected, with license plate ${licensePlate}`
+		);
+
+        // Finds spot occupied by this licensePlate and free it
+		const freed = removeParkedVehicle(licensePlate);
+
+		// LIMITATION: due to the project simplcity, if the license plate 
+		// is not found, we simulate the exit by removing a random spot instead
+		// (this is because we don't have another camera sensor for exit detection)
+        if (!freed && !noOccupiedSpots()) {
+			const spot = store.spots.find(spot => spot.isOccupied);
+			removeParkedVehicle(spot.occupiedBy);
+        }
+		
+		addNewLog(
+			"success", 
+			`Vehicle exit with plate ${licensePlate} allowed`
+		);
+    } catch (err) {
+		addNewLog(
+			"error", 
+			`API error on POST /exit: ${err.message}`
+		);
+		
+        next(err);
     }
+});
 
-    // find spot occupied by this licensePlate and free it
-    const spots = getSpots()
-    const spot = spots.find(s => s.occupiedBy === licensePlate)
-    if (!spot) {
-      return res.status(404).json({ error: 'License plate not found in any spot' })
-    }
+module.exports = router;
 
-    spot.occupiedBy = ''
-
-    res.json({ message: 'Spot freed', spotID: spot.id, timestamp: timestamp || new Date().toISOString() })
-  } catch (err) {
-    next(err)
-  }
-})
-
-module.exports = router
