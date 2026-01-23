@@ -299,7 +299,7 @@ void cv_task_creator(void) {
         NULL,
         tskIDLE_PRIORITY + 1,
         &recognition_task_handle,
-        1
+        0
     );
 }
 

@@ -45,13 +45,8 @@
 
 #endif
 
-// RGB LED pin definitions
-#define LED_R_GPIO  GPIO_NUM_6
-#define LED_G_GPIO  GPIO_NUM_7
-#define LED_B_GPIO  GPIO_NUM_8
-
 // Servo motor pin definition
-#define SERVO_PWM_GPIO   GPIO_NUM_14
+#define SERVO_PWM_GPIO   GPIO_NUM_1
 #define SERVO_ANGLE_DOWN 0
 #define SERVO_ANGLE_UP   90
 
@@ -61,14 +56,14 @@
  */
 void system_init()
 {
-    hw_init();
     wifi_init();
+    hw_init();
 
-    xTaskCreate(https_task, "https_init", 8192, NULL, 6, NULL);
+    // xTaskCreate(https_task, "https_init", 8192, NULL, 6, NULL);
 
     vTaskDelay(pdMS_TO_TICKS(5000));
 
-    xTaskCreate(weight_task, "weight_task", 8192, NULL, 5, NULL);
+    xTaskCreatePinnedToCore(weight_task, "weight_task", 8192, NULL, tskIDLE_PRIORITY + 1, NULL, 1);
 
     cv_task_creator();
 }
@@ -83,35 +78,35 @@ void hw_init()
     #endif
     ultrasonic_sensor_init();
     weight_sensor_init();
-    servo_init();
+    // servo_init();
 }
 
-static void rgb_off(void) {
-    gpio_set_level(LED_R_GPIO, 1);
-    gpio_set_level(LED_G_GPIO, 1);
-    gpio_set_level(LED_B_GPIO, 1);
-}
+// static void rgb_off(void) {
+//     gpio_set_level(LED_R_GPIO, 1);
+//     gpio_set_level(LED_G_GPIO, 1);
+//     gpio_set_level(LED_B_GPIO, 1);
+// }
 
-static void rgb_green(void) {
-    gpio_set_level(LED_R_GPIO, 1);
-    gpio_set_level(LED_G_GPIO, 0);
-    gpio_set_level(LED_B_GPIO, 1);
-}
+// static void rgb_green(void) {
+//     gpio_set_level(LED_R_GPIO, 1);
+//     gpio_set_level(LED_G_GPIO, 0);
+//     gpio_set_level(LED_B_GPIO, 1);
+// }
 
-static void rgb_blue(void) {
-    gpio_set_level(LED_R_GPIO, 1);
-    gpio_set_level(LED_G_GPIO, 1);
-    gpio_set_level(LED_B_GPIO, 0);
-}
+// static void rgb_blue(void) {
+//     gpio_set_level(LED_R_GPIO, 1);
+//     gpio_set_level(LED_G_GPIO, 1);
+//     gpio_set_level(LED_B_GPIO, 0);
+// }
 
-static void rgb_init(void) {
-    gpio_config_t io = {0};
-    io.pin_bit_mask = (1ULL << LED_R_GPIO) | (1ULL << LED_G_GPIO) | (1ULL << LED_B_GPIO);
-    io.mode = GPIO_MODE_OUTPUT;
-    io.intr_type = GPIO_INTR_DISABLE;
-    gpio_config(&io);
-    rgb_off();
-}
+// static void rgb_init(void) {
+//     gpio_config_t io = {0};
+//     io.pin_bit_mask = (1ULL << LED_R_GPIO) | (1ULL << LED_G_GPIO) | (1ULL << LED_B_GPIO);
+//     io.mode = GPIO_MODE_OUTPUT;
+//     io.intr_type = GPIO_INTR_DISABLE;
+//     gpio_config(&io);
+//     rgb_off();
+// }
 
 #ifndef CONFIG_USE_MOCK_CAMERA
 void camera_init()

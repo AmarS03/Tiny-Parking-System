@@ -17,6 +17,7 @@
 #include "esp_system.h"
 #include "esp_sleep.h"
 
+#include <stdbool.h>
 
 #include "../components/cv/cv.h"
 #include "../components/weight/weight.h"
@@ -65,8 +66,7 @@ void fsm_handle_event(Event_t event) {
     switch (curr_state) {
         case IDLE:
             if (event == VALID_WEIGHT_DETECTED) {
-                // curr_state = VEHICLE_ENTRY;
-                curr_state = ENTRY_ALLOWED; // TEMPORARY: Skip recognition for testing
+                curr_state = VEHICLE_ENTRY;
             } else if (event == EXIT_DETECTED) {
                 curr_state = VEHICLE_EXIT;
             } else if (event == REMOTE_OPEN) {
@@ -144,7 +144,7 @@ void init_fn() {
  */
 void idle_fn() {
     // System waiting for an event
-    enable_weight_detection(true);
+    //enable_weight_detection(true);
     recognition_busy = false;
 
     // Enter low power mode until an interrupt occurs
@@ -153,6 +153,7 @@ void idle_fn() {
     // wait for the ultrasonic sensor to detect vehicle passage
     if (ultrasonic_sensor_detect()) {
         ESP_LOGI("IDLE", "Detected vehicle exiting...");
+        vTaskDelay(pdMS_TO_TICKS(500)); // Debounce delay
         fsm_handle_event(EXIT_DETECTED);
     }
 }
@@ -223,19 +224,17 @@ void allow_fn() {
  * sensor to close it again
  */
 void exit_fn() {
+    enable_weight_detection(false);
     ESP_LOGI("EXIT", "Exit allowed. Opening gate...");
 
     //raise the barrier when vehicle exit is detected
     servo_motor_raise_barrier();
 
     // wait for some time to allow vehicle to exit
-    vTaskDelay(pdMS_TO_TICKS(10000));
+    vTaskDelay(pdMS_TO_TICKS(5000));
 
     // clsose the barrier after delay
     servo_motor_lower_barrier();
-
-    // wait for some time to allow vehicle to exit
-    vTaskDelay(pdMS_TO_TICKS(3000));
     
     ESP_LOGI("EXIT", "Vehicle passed. Closing gate...");
     
