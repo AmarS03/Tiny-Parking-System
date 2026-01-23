@@ -1,6 +1,5 @@
 "use client";
 
-import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CarFront, TextSearchIcon } from 'lucide-react';
@@ -12,7 +11,25 @@ export interface ParkingSpot {
 }
 
 export function ParkingLotSection() {
-    const { spots, toggleSpot } = useDashboard();
+    const spots : ParkingSpot[] = [
+        { id: 1, occupied: true, licensePlate: 'ABC-1234' },
+        { id: 2, occupied: false },
+        { id: 3, occupied: true, licensePlate: 'XYZ-5678' },
+        { id: 4, occupied: false },
+        { id: 5, occupied: false },
+        { id: 6, occupied: true, licensePlate: 'LMN-9101' },
+        { id: 7, occupied: false },
+        { id: 8, occupied: true, licensePlate: 'DEF-2345' },
+        { id: 9, occupied: false },
+        { id: 10, occupied: false },
+    ];
+
+    const toggleSpot = (id: number) => {
+        const spotIndex = spots.findIndex(s => s.id === id);
+        if (spotIndex !== -1) {
+            spots[spotIndex].occupied = !spots[spotIndex].occupied;
+        }
+    };
 
     const occupiedCount = spots.filter(s => s.occupied).length;
 
