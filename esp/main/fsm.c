@@ -241,6 +241,8 @@ void exit_fn() {
     enable_weight_detection(false);
     ESP_LOGI("EXIT", "Exit allowed. Opening gate...");
 
+    oled_print(3, "VEHICLE EXITING");
+
     //raise the barrier when vehicle exit is detected
     servo_motor_raise_barrier();
 
@@ -251,6 +253,8 @@ void exit_fn() {
     servo_motor_lower_barrier();
     
     ESP_LOGI("EXIT", "Vehicle passed. Closing gate...");
+
+    oled_clear();
     
     curr_state = IDLE;
 }

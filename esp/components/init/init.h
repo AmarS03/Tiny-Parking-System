@@ -26,6 +26,4 @@ void wifi_init();
 
 void servo_init(void);
 
-esp_err_t i2c_ng_init(void);
-
 #endif /* INIT_H */

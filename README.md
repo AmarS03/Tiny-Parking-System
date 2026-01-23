@@ -41,12 +41,6 @@ Our work is based on everything we have learned in the last 3 years, but most im
 - Hardware dependent/independent functions
 - And more...
 
-
-## Work organization
-
-...
-
-
 ## How it works
 
 ### State diagram
@@ -105,7 +99,9 @@ Tiny-Parking-System
 |   |   ├── cv/
 |   |   ├── https/
 |   |   ├── init/
+|   |   ├── oled/
 |   |   ├── servo_motor/
+|   |   ├── ultrasonic_sensor/
 |   |   ├── weight/
 |   |   └── wifi/
 │   ├── main/                  # Main application files
@@ -140,7 +136,8 @@ The project utilizes the following third-party libraries:
 | `esp-idf-lib/ultrasonic` | Ultrasonic sensor for vehicle detection |
 | `esp-idf-lib/hx711` | Weight sensor for vehicle classification |
 | `espressif/cjson` | JSON parsing for API communication |
-| `espressif/servo` | Servo motor for the parking barrier
+| `espressif/servo` | Servo motor for the parking barrier |
+| `nopnop2002/ssd1306` | OLED for information display | 
 
 ### API model:
 
@@ -189,14 +186,13 @@ Before getting started, ensure that you have the following installed:
 | Camera SDA | GPIO 4 |
 | Camera SCL | GPIO 5 |
 | Camera D0-D7 | GPIO 11, 9, 8, 10, 12, 18, 17, 16 |
-| LED Red | GPIO 6 |
-| LED Green | GPIO 7 |
-| LED Blue | GPIO 8 |
-| Ultrasonic TRIG | GPIO 42 |
-| Ultrasonic ECHO | GPIO 41 |
-| Weight Sensor DOUT | GPIO 1 |
-| Weight Sensor CLK | GPIO 2 |
-| Servo Motor PWM | GPIO 14 |
+| Ultrasonic TRIG | GPIO 3 |
+| Ultrasonic ECHO | GPIO 20 |
+| Weight Sensor DOUT | GPIO 21 |
+| Weight Sensor CLK | GPIO 14 |
+| Servo Motor PWM | GPIO 1 |
+| OLED SDA | GPIO 42 |
+| OLED SCL | GPIO 41 |
 
 ...
 

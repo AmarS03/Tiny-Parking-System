@@ -8,6 +8,9 @@
 #include "oled.h"
 #include "esp_log.h"
 
+#define OLED_SDA_GPIO GPIO_NUM_42
+#define OLED_SCL_GPIO GPIO_NUM_41
+
 
 static const char *TAG = "OLED";
 
@@ -21,7 +24,7 @@ static SSD1306_t dev;
 void oled_init(i2c_port_t i2c_port)
 {
     // Initialize I2C master
-    i2c_master_init(&dev, GPIO_NUM_42, GPIO_NUM_41, -1);
+    i2c_master_init(&dev, OLED_SDA_GPIO, OLED_SCL_GPIO, -1);
 
     // Initialize SSD1306 (I2C, 128x64)
     ssd1306_init(&dev, 128, 64);
