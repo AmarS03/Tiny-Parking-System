@@ -2,7 +2,6 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { AlertCircle, Info, FileText, CheckCircle2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
 export interface logMessage {
     timestamp: string;
@@ -21,77 +20,13 @@ const formatDate = (dateString: string) => {
     return `${day}/${month}/${year} - ${time}`;
 };
 
-function getTimeDifference(timestamp: string): string {
-    const now = new Date();
-    const updated = new Date(timestamp);
-    const diffMs = now.getTime() - updated.getTime();
-    const diffSeconds = Math.floor(diffMs / 1000);
-    const diffMinutes = Math.floor(diffSeconds / 60);
-    const diffHours = Math.floor(diffMinutes / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffSeconds < 60) return 'just now';
-    if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
-    if (diffHours < 24) return `over ${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
-    return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
-};
-
-export function SystemLogSection() {
-    const [logs, setLogs] = useState<logMessage[]>([]);
-    const [lastUpdated, setLastUpdated] = useState<string>('');
-    const [timeDifference, setTimeDifference] = useState<string>('Awaiting data...');
-
-    useEffect(() => {
-        // Fetch initial logs from API
-        const fetchInitialLogs = async () => {
-            try {
-                const response = await fetch('https://tinyparkingsystem-api.vercel.app/status');
-                const data = await response.json();
-                setLogs(data.logs || []);
-                setLastUpdated(new Date(data.lastUpdatedAt).toLocaleString('it-IT'));
-                setTimeDifference(getTimeDifference(data.lastUpdatedAt));
-            } catch (error) {
-                console.error('Failed to fetch initial logs:', error);
-                setLogs([
-                    { timestamp: new Date().toISOString(), message: 'Unable to connect to API', type: 'error' },
-                ]);
-            }
-        };
-
-        fetchInitialLogs();
-
-        // Connect to SSE stream for real-time updates
-        const eventSource = new EventSource('https://tinyparkingsystem-api.vercel.app/status/logs/stream');
-        
-        eventSource.onmessage = (event) => {
-            try {
-                const newLog = JSON.parse(event.data) as logMessage;
-                setLogs(prevLogs => [...prevLogs, newLog]);
-                setLastUpdated(new Date(newLog.timestamp).toLocaleString('it-IT'));
-                setTimeDifference(getTimeDifference(newLog.timestamp));
-            } catch (error) {
-                console.error('Failed to parse SSE message:', error);
-            }
-        };
-
-        eventSource.onerror = () => {
-            console.error('SSE connection error');
-            eventSource.close();
-        };
-
-        // Update time difference every minute
-        const interval = setInterval(() => {
-            if (logs.length > 0) {
-                setTimeDifference(getTimeDifference(logs[logs.length - 1].timestamp));
-            }
-        }, 60000);
-
-        return () => {
-            eventSource.close();
-            clearInterval(interval);
-        };
-    }, []);
-
+export function SystemLogSection(
+    {
+        logsData
+    } : {
+        logsData: logMessage[]
+    }
+) {
     const getIcon = (type: logMessage['type']) => {
         switch (type) {
             case 'success': return <CheckCircle2 className="h-4 w-4 text-green-500" />;
@@ -121,14 +56,14 @@ export function SystemLogSection() {
             <CardContent className="py-0">
                 <div className="space-y-4">
                     {
-                        logs.length === 0 && (
+                        logsData.length === 0 && (
                             <div className="text-center text-sm text-muted-foreground py-8">
                                 No activity recorded yet.
                             </div>
                         )
                     }
                     {
-                        [...logs].reverse().map((log, index) => (
+                        [...logsData].reverse().map((log, index) => (
                             <div key={index} className="flex gap-8 items-start text-sm border-b pb-2 last:border-0">
                                 <div className='flex flex-col'>
                                     <div className='flex flex-row gap-1 items-center'>

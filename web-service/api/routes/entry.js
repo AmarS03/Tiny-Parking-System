@@ -15,7 +15,7 @@ router.post("/", (req, res, next) => {
 			imageUrl
 		);
 
-        if (isLicensePlateValid(licensePlate)) {
+        if (!isLicensePlateValid(licensePlate)) {
             addNewLog(
 				"warning", 
 				`Vehicle entry with plate ${licensePlate} denied (invalid format)`,
@@ -28,7 +28,7 @@ router.post("/", (req, res, next) => {
 					message: `Invalid license plate`
 				}
 			);
-        } else if (isLicensePlateAllowed(licensePlate)) {
+        } else if (!isLicensePlateAllowed(licensePlate)) {
             addNewLog(
 				"warning", 
 				`Vehicle entry with plate ${licensePlate} denied (not in allowed list)`,

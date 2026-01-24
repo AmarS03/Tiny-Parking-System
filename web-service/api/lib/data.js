@@ -12,6 +12,7 @@ const store = {
         { name: "Weight sensor", status: "No connection", espStatus: "Awaiting system connection" },
         { name: "Motor sensor", status: "No connection", espStatus: "Awaiting system connection" },
         { name: "Wifi sensor", status: "No connection", espStatus: "Awaiting system connection" },
+        { name: "OLED Display", status: "No connection", espStatus: "Awaiting system connection" },
     ],
     logs: [],
     allowedPlates: [],

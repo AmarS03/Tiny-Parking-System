@@ -18,7 +18,7 @@ router.post("/", (req, res, next) => {
 			"info", 
 			`Vehicle exit detected, with license plate ${licensePlate}`
 		);
-
+		
         // Finds spot occupied by this licensePlate and free it
 		const freed = removeParkedVehicle(licensePlate);
 
