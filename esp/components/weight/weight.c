@@ -20,12 +20,12 @@
 #define TAG "WEIGHT"
 
 // Weight sensor pin definitions
-#define HX711_DOUT_GPIO  GPIO_NUM_1
-#define HX711_CLK_GPIO   GPIO_NUM_2
+#define HX711_DOUT_GPIO  GPIO_NUM_21
+#define HX711_CLK_GPIO   GPIO_NUM_14
 
 // Detection parameters
-#define NOISE_THRESHOLD          80.0f
-#define MIN_CAR_WEIGHT           400.0f
+#define NOISE_THRESHOLD          10.0f
+#define MIN_CAR_WEIGHT           50.0f
 #define MAX_CAR_WEIGHT           1800.0f
 #define DETECT_COUNT_REQUIRED    5
 
@@ -62,9 +62,11 @@ static void save_calibration();
 static void load_calibration(void)
 {
     nvs_handle_t nvs;
-    if (nvs_open("weight", NVS_READONLY, &nvs) == ESP_OK) {
-        nvs_get_i32(nvs, "scale", (int32_t*) &scale);
-        nvs_get_i32(nvs, "offset", (int32_t*) &offset);
+    if (nvs_open("weight", NVS_READONLY, &nvs) == ESP_OK) {\
+        size_t scale_size = sizeof(scale);
+        size_t offset_size = sizeof(offset);
+        nvs_get_blob(nvs, "scale", &scale, &scale_size);
+        nvs_get_blob(nvs, "offset", &offset, &offset_size);
         nvs_close(nvs);
         ESP_LOGI(TAG, "Loaded calibration: scale=%.6f offset=%.2f", scale, offset);
     } else {
@@ -78,12 +80,15 @@ static void load_calibration(void)
 static void save_calibration(void)
 {
     nvs_handle_t nvs;
-    if (nvs_open("weight", NVS_READWRITE, &nvs) == ESP_OK) {
-        nvs_set_i32(nvs, "scale", (int32_t) scale);
-        nvs_set_i32(nvs, "offset", (int32_t) offset);
+    esp_err_t err = nvs_open("weight", NVS_READWRITE, &nvs);
+    if (err == ESP_OK) {
+        nvs_set_blob(nvs, "scale", &scale, sizeof(scale));
+        nvs_set_blob(nvs, "offset", &offset, sizeof(offset));
         nvs_commit(nvs);
         nvs_close(nvs);
         ESP_LOGI(TAG, "Calibration saved");
+    } else {
+        ESP_LOGE(TAG, "Failed to open NVS for saving calibration %s", esp_err_to_name(err));
     }
 }
 
@@ -99,11 +104,19 @@ static void save_calibration(void)
  */
 esp_err_t weight_init(void)
 {
-    hx711_init(&hx);
+    // try to initialize HX711 
+    esp_err_t ret = hx711_init(&hx);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize HX711: %s", esp_err_to_name(ret));
+        return ret;
+    }
 
     // Initial raw offset (empty scale)
     int32_t raw;
-    hx711_read_average(&hx, 10, &raw);
+    esp_err_t err = hx711_read_average(&hx, 10, &raw);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to read average from HX711: %s", esp_err_to_name(err));
+    }
     offset = raw;
 
     load_calibration();
@@ -124,7 +137,9 @@ esp_err_t weight_init(void)
 float weight_read_grams(void)
 {
     int32_t raw;
-    if (hx711_read_average(&hx, 5, &raw) != ESP_OK) {
+    esp_err_t ret = hx711_read_average(&hx, 5, &raw);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to read weight %s", esp_err_to_name(ret));
         return 0;
     }
 
@@ -142,6 +157,8 @@ float weight_read_grams(void)
 bool weight_detect_vehicle(void)
 {
     float raw_weight = weight_read_grams();
+
+    ESP_LOGI(TAG, "Raw weight: %.1f g", raw_weight);
 
     // Baseline drift compensation
     baseline = baseline * 0.99f + raw_weight * 0.01f;
@@ -181,6 +198,11 @@ bool weight_detect_vehicle(void)
  */
 void weight_calibrate(float known_weight_g)
 {
+    esp_err_t ret = hx711_init(&hx);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize HX711: %s", esp_err_to_name(ret));
+    }
+
     int32_t raw_empty, raw_loaded;
 
     ESP_LOGI(TAG, "Calibrating... remove all weight");
@@ -189,12 +211,16 @@ void weight_calibrate(float known_weight_g)
     hx711_read_average(&hx, 15, &raw_empty);
     offset = raw_empty;
 
+    ESP_LOGI(TAG, "Raw empty reading: %d", raw_empty);
+
     ESP_LOGI(TAG, "Place %.1f g on the scale", known_weight_g);
     vTaskDelay(pdMS_TO_TICKS(5000));
 
     hx711_read_average(&hx, 15, &raw_loaded);
 
-    scale = known_weight_g / (float)(raw_loaded - raw_empty);
+    ESP_LOGI(TAG, "Raw loaded reading: %d", raw_loaded);
+
+    scale = known_weight_g / ((float)(raw_loaded - raw_empty) ? : known_weight_g);
 
     save_calibration();
 
@@ -232,8 +258,8 @@ void weight_task(void *arg) {
             ESP_LOGI(TAG, "Valid weight detected!");
             fsm_handle_event(VALID_WEIGHT_DETECTED);
         }
-        // Sleep for 100 ms before next reading
-        vTaskDelay(pdMS_TO_TICKS(100));
+        // Sleep for 300 ms before next reading
+        vTaskDelay(pdMS_TO_TICKS(300));
     }
 }
 
