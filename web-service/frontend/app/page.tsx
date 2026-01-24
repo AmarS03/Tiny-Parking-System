@@ -1,42 +1,74 @@
-import { SensorStatusCard } from '@/components/dashboard/SensorStatusCard';
-import { ParkingLotCard } from '@/components/dashboard/ParkingLotCard';
-import { BarrierControlCard } from '@/components/dashboard/BarrierControlCard';
-import { ActivityLogCard } from '@/components/dashboard/ActivityLogCard';
-import { ModeToggle } from '@/components/mode-toggle';
-import { DashboardProvider } from '@/components/dashboard-provider';
+import { SystemLogSection } from "@/components/SystemLogSection";
+import { ProjectInfoSection } from "@/components/ProjectInfoSection";
+import { SystemStatusSection } from "@/components/SystemStatusSection"
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Activity, ActivityIcon, FileText, SquareParkingIcon, TextSearchIcon } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Home() {
-  return (
-    <DashboardProvider>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 lg:p-8 font-[family-name:var(--font-geist-sans)]">
-        <header className="mb-8 flex flex-row justify-between items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Parking Dashboard</h1>
-            <p className="text-muted-foreground">Real-time monitoring and control system</p>
-          </div>
-          <ModeToggle />
-        </header>
+    return (
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 lg:p-8 font-(family-name:--font-geist-sans)">
+                <header className="mb-4 flex flex-row justify-between items-center gap-4">
+                    <div>
+                        <h1 className="text-4xl font-bold mb-1 tracking-tight text-slate-900 dark:text-slate-100">
+                            🅿️ Tiny Parking System Dashboard
+                        </h1>
+                        <p className="text-lg text-muted-foreground">
+                            Our project for the Embedded Software for the Internet of Things course - 2025/2026
+                        </p>
+                    </div>
+                </header>
 
-        <main className="grid grid-cols-1 lg:grid-cols-4 gap-6 max-w-[1600px] mx-auto">
-          {/* Left Column: Sensors & Controls */}
-          <div className="lg:col-span-1 space-y-6 flex flex-col">
-            <div className="flex-none">
-              <SensorStatusCard />
+                <main>
+					<Tabs defaultValue="info">
+						<TabsList>
+							<TabsTrigger value="info">
+								<TextSearchIcon />
+								About the project
+							</TabsTrigger>
+							<TabsTrigger value="status">
+								<ActivityIcon className="text-green-500" />
+								System status
+							</TabsTrigger>
+							<TabsTrigger value="log">
+								<FileText className="text-violet-500" />
+								System log
+							</TabsTrigger>
+							<TabsTrigger value="parking">
+								<SquareParkingIcon className="text-blue-500" />
+								Parking visualization
+							</TabsTrigger>
+						</TabsList>
+						<TabsContent value="info">
+                            <ProjectInfoSection />
+						</TabsContent>
+						<TabsContent value="status">
+                            <SystemStatusSection />
+						</TabsContent>
+						<TabsContent value="log">
+							<SystemLogSection />
+						</TabsContent>
+						<TabsContent value="parking">
+							<Card className="h-full shadow-md hover:shadow-lg transition-shadow">
+								<CardHeader>
+									<CardTitle className="flex items-center text-xl gap-2">
+										<SquareParkingIcon className="h-6 w-6 text-blue-500" />
+										Parking visualization
+									</CardTitle>
+									<CardDescription className='text-muted-foreground'>
+										<span className='text-black font-medium'>Last updated:</span> 26/01/2026 - 14:23
+										<br />
+										<span className='text-xs'>(over 2 hours ago)</span>
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									Parking visualization here
+								</CardContent>
+							</Card>
+						</TabsContent>
+					</Tabs>
+                </main>
             </div>
-            <div className="flex-none">
-              <BarrierControlCard />
-            </div>
-            <div className="flex-1 min-h-[300px]">
-              <ActivityLogCard />
-            </div>
-          </div>
-
-          {/* Right Column: Visualization (Takes up more space) */}
-          <div className="lg:col-span-3 min-h-[500px] lg:h-auto">
-            <ParkingLotCard />
-          </div>
-        </main>
-      </div>
-    </DashboardProvider>
-  );
+    );
 }
