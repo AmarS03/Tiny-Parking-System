@@ -29,7 +29,6 @@ typedef enum {
     ENTRY_REFUSED,
     ENTRY_ALLOWED,
     VEHICLE_EXIT,
-    CLOSED,
     STATES_NUM
 } State_t;
 

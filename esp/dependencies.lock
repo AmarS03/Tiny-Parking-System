@@ -109,6 +109,14 @@ dependencies:
     source:
       type: idf
     version: 5.5.1
+  nopnop2002/ssd1306:
+    component_hash: c118e111d989d2b427ff714bab329405d76deff181bd1bb7356b3b19e74c141b
+    dependencies: []
+    source:
+      git: https://github.com/nopnop2002/esp-idf-ssd1306.git
+      path: components/ssd1306
+      type: git
+    version: 3043b5d7ea97e98598924248c333c61bd5776e66
 direct_dependencies:
 - esp-idf-lib/hx711
 - esp-idf-lib/ultrasonic
@@ -116,6 +124,7 @@ direct_dependencies:
 - espressif/esp32-camera
 - espressif/servo
 - idf
-manifest_hash: cf6711f056a99b74c26a8788fd8f6a3621e7d397370d8d5728dbc65165b44969
+- nopnop2002/ssd1306
+manifest_hash: 53dc7285e58fb6327bac3337ff8c2dd31edb4c20149fe9de17e0bb3864f3b02d
 target: esp32s3
 version: 2.0.0

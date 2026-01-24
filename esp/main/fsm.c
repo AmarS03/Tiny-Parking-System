@@ -25,6 +25,7 @@
 #include "../components/https/https.h"
 #include "../components/init/init.h"
 #include "../components/servo_motor/servo_motor.h"
+#include "../components/oled/oled.h"
 
 // Idle delay function for low power mode
 #ifdef CONFIG_USE_MOCK_CAMERA
@@ -36,11 +37,16 @@
     } while(0)
 #endif
 
+#define TOTAL_PARKING_SPOTS 10
+
 // Current state of the FSM
 static State_t curr_state = INIT;
 
 // Flag that avoids multiple concurrent recognitions
 static bool recognition_busy = false;
+
+// Parking spot counter
+static int parking_spots_available = TOTAL_PARKING_SPOTS;
 
 // Prototypes of state functions
 static void init_fn();
@@ -54,8 +60,6 @@ static void refuse_fn();
 static void allow_fn();
 
 static void exit_fn();
-
-static void closed_fn();
 
 
 ////////////////////////////////////////////////////////////////
@@ -79,8 +83,6 @@ void fsm_handle_event(Event_t event) {
             } else if (event == PLATE_REFUSED) {
                 curr_state = ENTRY_REFUSED;
             }
-            break;
-        case CLOSED:    
             break;
         default:
             // Handle invalid state
@@ -109,9 +111,6 @@ void fsm_run_state_function() {
         case VEHICLE_EXIT:
             exit_fn();
             break;
-        case CLOSED:
-            closed_fn();
-            break;
         default:
             // Handle invalid state
             break;
@@ -134,6 +133,19 @@ void init_fn() {
 
     ESP_LOGI("INIT", "System ready. Waiting for detection...");
 
+    vTaskDelay(pdMS_TO_TICKS(2000));
+
+    ESP_LOGI("INIT", "Displaying status on OLED...");
+
+
+    oled_print(0, "ESP32-S3 READY");
+    oled_print(2, "HX711 OK");
+    oled_print(4, "WiFi CONNECTED");
+
+    vTaskDelay(pdMS_TO_TICKS(5000));
+
+    oled_clear();
+
     curr_state = IDLE;
 }
 
@@ -143,8 +155,20 @@ void init_fn() {
  */
 void idle_fn() {
     // System waiting for an event
-    //enable_weight_detection(true);
-    recognition_busy = false;
+    oled_clear();
+
+    if (parking_spots_available <= 0) {
+        enable_weight_detection(false);
+        oled_print(2, "The parking lot");
+        oled_print(4, "is full!");
+    } else {
+        enable_weight_detection(true);
+        recognition_busy = false;
+        char spots_str[20];
+        snprintf(spots_str, sizeof(spots_str), "available: %d", parking_spots_available);
+        oled_print(2, "Parking spots");
+        oled_print(4, spots_str);
+    }
 
     // Enter low power mode until an interrupt occurs
     IDLE_DELAY();
@@ -155,6 +179,7 @@ void idle_fn() {
         vTaskDelay(pdMS_TO_TICKS(500)); // Debounce delay
         fsm_handle_event(EXIT_DETECTED);
     }
+
 }
 
 /**
@@ -164,10 +189,17 @@ void idle_fn() {
 void entry_fn() {
     enable_weight_detection(false);
 
+    oled_clear();
+
+    oled_print(2, "Verifying license");
+    oled_print(4, "plate...");
+
     if (!recognition_busy) {
         unblock_recognition_task();
         recognition_busy = true;
     }
+
+    oled_clear();
 }
 
 /**
@@ -175,8 +207,15 @@ void entry_fn() {
  * message on the LCD
  */
 void refuse_fn() {
+    oled_clear();
     ESP_LOGI("REFUSE", "Entry refused. Access denied.");
+
+    oled_print(2, "Your vehicle");
+    oled_print(4, "is not allowed!");
+
     vTaskDelay(pdMS_TO_TICKS(5000));
+
+    oled_clear();
     curr_state = IDLE;
 }
 
@@ -186,7 +225,13 @@ void refuse_fn() {
  * from the ultrasonic sensor to close it again
  */
 void allow_fn() {
+    oled_clear();
     ESP_LOGI("ALLOW", "Entry allowed. Opening gate...");
+
+    oled_print(3, "Entrance allowed!");
+
+    // Update counter
+    parking_spots_available--;
 
     // raise the barrier when entry is allowed
     servo_motor_raise_barrier();
@@ -209,11 +254,16 @@ void allow_fn() {
     }
 
     ESP_LOGI("ALLOW", "Vehicle passed. Closing gate...");
+
+    oled_clear();
+
+    oled_print(3, "Closing gate...");
     
     // close the barrier after ultrasonic read
     servo_motor_lower_barrier();
     vTaskDelay(pdMS_TO_TICKS(3000));
     
+    oled_clear();
     curr_state = IDLE;
 }
 
@@ -223,8 +273,14 @@ void allow_fn() {
  * sensor to close it again
  */
 void exit_fn() {
+    oled_clear();
     enable_weight_detection(false);
     ESP_LOGI("EXIT", "Exit allowed. Opening gate...");
+
+    oled_print(3, "Vehicle exiting");
+
+    // Update counter
+    parking_spots_available++;
 
     //raise the barrier when vehicle exit is detected
     servo_motor_raise_barrier();
@@ -236,17 +292,9 @@ void exit_fn() {
     servo_motor_lower_barrier();
     
     ESP_LOGI("EXIT", "Vehicle passed. Closing gate...");
+
+    oled_clear();
     
     curr_state = IDLE;
-}
-
-/**
- * Disables interrupts and shows an info
- * message on the LCD
- */
-void closed_fn() {
-
-    // close the barrier when the system force closes
-    servo_motor_raise_barrier();
 }
 
