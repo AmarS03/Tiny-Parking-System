@@ -10,6 +10,10 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_system.h"
+#include "esp_log.h"
+#include "esp_err.h"
+#include "nvs_flash.h"
 
 #include "fsm.h"
 #include "../components/weight/weight.h"
@@ -35,9 +39,16 @@ void fsm_task(void *arg)
  */
 void calibration_task(void *arg)
 {
-    weight_init();
+    // initialize NVS before anything else
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+
     // Perform weight calibration with a known weight of 1000 grams
-    weight_calibrate(1000.0f);
+    weight_calibrate(100.0f);
     vTaskDelete(NULL); // Delete this task after calibration
 }
 #endif
@@ -47,7 +58,8 @@ void app_main(void) {
     #ifdef CONFIG_WEIGHT_CALIBRATION
     // Start calibration task
     xTaskCreate(calibration_task, "calibration_task", 8192, NULL, 5, NULL);
-    #endif
+    #else
 
     xTaskCreate(fsm_task, "fsm_task", 8192, NULL, 5, NULL);
+    #endif
 }
