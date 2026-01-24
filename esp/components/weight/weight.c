@@ -24,9 +24,9 @@
 #define HX711_CLK_GPIO   GPIO_NUM_14
 
 // Detection parameters
-#define NOISE_THRESHOLD          10.0f
-#define MIN_CAR_WEIGHT           50.0f
-#define MAX_CAR_WEIGHT           1800.0f
+#define NOISE_THRESHOLD          5.0f
+#define MIN_CAR_WEIGHT           25.0f
+#define MAX_CAR_WEIGHT           100.0f
 #define DETECT_COUNT_REQUIRED    5
 
 // Variables for HX711
