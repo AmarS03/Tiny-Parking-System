@@ -35,7 +35,7 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT      BIT1
 
-static const char *TAG = "wifi";
+static const char *TAG = "Wifi";
 
 static int s_retry_num = 0;
 
@@ -65,7 +65,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
 /**
  * @brief Initialize WiFi as sta and connect to AP
  */
-void wifi_init_service(void)
+esp_err_t wifi_init_service(void)
 {
     s_wifi_event_group = xEventGroupCreate();
 
@@ -129,11 +129,14 @@ void wifi_init_service(void)
     if (bits & WIFI_CONNECTED_BIT) {
         ESP_LOGI(TAG, "connected to ap SSID:%s",
                  WIFI_SSD);
+        return ESP_OK;
     } else if (bits & WIFI_FAIL_BIT) {
         ESP_LOGI(TAG, "Failed to connect to SSID:%s",
                  WIFI_SSD);
+        return ESP_FAIL;
     } else {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
+        return ESP_ERR_INVALID_STATE;
     }
 }
 

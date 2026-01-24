@@ -126,7 +126,6 @@ void fsm_run_state_function() {
  * Initializes the whole system
  */
 void init_fn() {
-
     system_init();
 
     #ifdef CONFIG_USE_MOCK_CAMERA

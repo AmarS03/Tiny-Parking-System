@@ -10,6 +10,7 @@
     "test": "node --version && echo 'no tests yet'"
   },
   "dependencies": {
+    "@vercel/edge-config": "^1.4.3",
     "cors": "^2.8.5",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.0",

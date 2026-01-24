@@ -1,57 +1,86 @@
-const express = require('express')
-const router = express.Router()
-const { store, initSpots, getSpots } = require('../lib/data')
+const express = require("express");
+const { addNewLog, isLicensePlateAllowed, parkVehicle } = require("../lib/data");
+const { isLicensePlateValid } = require("../lib/utils");
 
-let nextEntryId = 1
+const router = express.Router();
 
-// POST /entry - records a vehicle entering and returns entryID
-router.post('/', (req, res, next) => {
-  try {
-    const { licensePlate, recordedWeight, timestamp } = req.body
-    if (!licensePlate || typeof recordedWeight !== 'number') {
-      const err = new Error('Invalid entryRequest payload')
-      err.status = 400
-      throw err
+// POST /entry - records a vehicle entering and returns the entry result
+router.post("/", (req, res, next) => {
+    try {
+        const { licensePlate, imageUrl, recordedWeight } = req.body;
+	
+		addNewLog(
+			"info", 
+			`Vehicle entry detected, with license plate ${licensePlate} and weight ${recordedWeight}`,
+			imageUrl
+		);
+
+        if (isLicensePlateValid(licensePlate)) {
+            addNewLog(
+				"warning", 
+				`Vehicle entry with plate ${licensePlate} denied (invalid format)`,
+				imageUrl
+			);
+			
+        	return res.json(
+				{
+					allowed: false,
+					message: `Invalid license plate`
+				}
+			);
+        } else if (isLicensePlateAllowed(licensePlate)) {
+            addNewLog(
+				"warning", 
+				`Vehicle entry with plate ${licensePlate} denied (not in allowed list)`,
+				imageUrl
+			);
+			
+        	return res.json(
+				{
+					allowed: false,
+					message: `License plate denied`
+				}
+			);
+        } else {
+			const availableSpot = parkVehicle(licensePlate);
+
+			if (availableSpot) {
+				addNewLog(
+					"warning", 
+					`Vehicle entry with plate ${licensePlate} denied (no available parking spots)`,
+					imageUrl
+				);
+				
+				return res.json(
+					{
+						allowed: false,
+						message: `No parking spots available`
+					}
+				);
+			} else {
+				addNewLog(
+					"success", 
+					`Vehicle entry with plate ${licensePlate} allowed`,
+					imageUrl
+				);
+				
+				return res.json(
+					{
+						allowed: true,
+						message: `License plate allowed`
+					}
+				);
+			}
+		}
+    } catch (err) {
+		addNewLog(
+			"error", 
+			`API error on POST /entry: ${err.message}`
+		);
+		
+        next(err);
     }
+});
 
-    // create an entry record and push to logs
-    const entry = {
-      entryID: String(nextEntryId++),
-      licensePlate,
-      recordedWeight,
-      timestamp: timestamp || new Date().toISOString(),
-      allowed: null,
-      message: 'pending',
-    }
+module.exports = router;
 
-    store.logs.push(entry)
-
-    res.json(Number(entry.entryID))
-  } catch (err) {
-    next(err)
-  }
-})
-
-// GET /entry/:entryID - returns entry result if recorded
-router.get('/:entryID', (req, res, next) => {
-  try {
-    const { entryID } = req.params
-    const found = store.logs.find(e => e.entryID === entryID)
-    if (!found) {
-      return res.status(404).json({ error: 'Not found: invalid entryID' })
-    }
-
-    const response = {
-      entryID: found.entryID,
-      allowed: !!found.allowed,
-      message: found.message,
-      timestamp: found.timestamp,
-    }
-
-    res.json(response)
-  } catch (err) {
-    next(err)
-  }
-})
-
-module.exports = router
