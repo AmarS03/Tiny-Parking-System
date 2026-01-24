@@ -17,9 +17,9 @@ export function ProjectInfoSection() {
                     </a>
                 </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-8 pt-2">
                 <div className="space-y-1.5">
-                    <h4 className="font-semibold text-xl">
+                    <h4 className="font-semibold text-[1.35rem]">
                         About this project
                     </h4>
                     <p className="text-sm text-gray-700">
@@ -28,7 +28,7 @@ export function ProjectInfoSection() {
                 </div>
 
                 <div className="space-y-1.5">
-                    <h4 className="font-semibold text-xl">
+                    <h4 className="font-semibold text-[1.35rem]">
                         What it does and how it works
                     </h4>
                     <p className="text-sm text-gray-700">
@@ -36,52 +36,50 @@ export function ProjectInfoSection() {
                     </p>
                 </div>
 
-                <div className="space-y-1.5">
-                    <h4 className="font-semibold text-xl">
-                        Dashboard functionalities
+                <div>
+                    <h4 className="font-semibold text-[1.35rem]">
+                        Dashboard sections
                     </h4>
-                    <p className="text-sm text-gray-700">
-                        Text here
-                    </p>
+                    <div className="space-y-5 mt-4">
+                        <div className="space-y-1">
+                            <h4 className="flex items-center gap-1 font-semibold text-lg">
+                                <ParkingSquareIcon className="text-blue-500 size-5" />
+                                Project info
+                            </h4>
+                            <p className="text-sm text-gray-700">
+                                You are here :)
+                            </p>
+                        </div>
 
-                    <div className="mt-4 space-y-0.5">
-                        <h4 className="flex items-center gap-1 font-semibold text-lg">
-                            <ParkingSquareIcon className="text-blue-500 size-5" />
-                            Project info
-                        </h4>
-                        <p className="text-sm text-gray-700">
-                            You are here :)
-                        </p>
-                    </div>
+                        <div className="mt-4 space-y-1">
+                            <h4 className="flex items-center gap-1 font-semibold text-lg">
+                                <ActivityIcon className="text-green-500 size-5" />
+                                System status
+                            </h4>
+                            <p className="text-sm text-gray-700">
+                                Text here
+                            </p>
+                        </div>
 
-                    <div className="mt-4 space-y-0.5">
-                        <h4 className="flex items-center gap-1 font-semibold text-lg">
-                            <ActivityIcon className="text-green-500 size-5" />
-                            System status
-                        </h4>
-                        <p className="text-sm text-gray-700">
-                            Text here
-                        </p>
-                    </div>
+                        <div className="mt-4 space-y-1">
+                            <h4 className="flex items-center gap-1 font-semibold text-lg">
+                                <FileTextIcon className="text-violet-500 size-5" />
+                                System log
+                            </h4>
+                            <p className="text-sm text-gray-700">
+                                Text here
+                            </p>
+                        </div>
 
-                    <div className="mt-4 space-y-0.5">
-                        <h4 className="flex items-center gap-1 font-semibold text-lg">
-                            <FileTextIcon className="text-violet-500 size-5" />
-                            System log
-                        </h4>
-                        <p className="text-sm text-gray-700">
-                            Text here
-                        </p>
-                    </div>
-
-                    <div className="mt-4 space-y-0.5">
-                        <h4 className="flex items-center gap-1 font-semibold text-lg">
-                            <ParkingMeterIcon className="text-amber-500 size-5" />
-                            Parking simulation
-                        </h4>
-                        <p className="text-sm text-gray-700">
-                            Text here
-                        </p>
+                        <div className="mt-4 space-y-1">
+                            <h4 className="flex items-center gap-1 font-semibold text-lg">
+                                <ParkingMeterIcon className="text-amber-500 size-5" />
+                                Parking simulation
+                            </h4>
+                            <p className="text-sm text-gray-700">
+                                Text here
+                            </p>
+                        </div>
                     </div>
                 </div>
 

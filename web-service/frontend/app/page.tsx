@@ -78,7 +78,7 @@ export default function Home() {
 	useEffect(() => {
 		const fetchStatus = async () => {
 			try {
-				const response = await fetch('http://localhost:5000/status');
+				const response = await fetch('https://tinyparkingsystem-api.vercel.app/status');
 				const responseData = await response.json();
 
 				updateData(responseData || {});

@@ -68,7 +68,7 @@ export default function ManageAllowedPlates(
 
         try {
             // Send the updated status back
-            const putResponse = await fetch('http://localhost:5000/allowed', {
+            const putResponse = await fetch('https://tinyparkingsystem-api.vercel.app/allowed', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
