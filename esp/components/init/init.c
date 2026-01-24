@@ -9,6 +9,7 @@
 #include "init.h"
 #include "../cv/cv.h"
 #include "../https/https.h"
+#include "../https/https_task.h"
 #include "../ultrasonic_sensor/ultrasonic_sensor.h"
 #include "../weight/weight.h"
 #include "../wifi/wifi.h"
@@ -60,6 +61,9 @@
  */
 void system_init()
 {
+    // Initialize WiFi first (for NVS)
+    esp_err_t wifi_status = wifi_init();
+
     esp_err_t camera_status = ESP_OK;
 
     #ifndef CONFIG_USE_MOCK_CAMERA
@@ -69,31 +73,17 @@ void system_init()
     esp_err_t ultrasonic_status = ultrasonic_sensor_init();
     esp_err_t weight_status = weight_sensor_init();
     esp_err_t servo_status = servo_init();
-    esp_err_t wifi_status = wifi_init();
+    esp_err_t oled_status = oled_init(I2C_NUM_0);
+    
+    set_status_variables(camera_status, ultrasonic_status, weight_status, servo_status, wifi_status, oled_status);
 
-    send_system_status_to_api(camera_status, ultrasonic_status, weight_status, servo_status, wifi_status);
-
-    hw_init();
+    xTaskCreate(put_status_task, "put_status_task", 8192, NULL, 5, NULL);
 
     vTaskDelay(pdMS_TO_TICKS(5000));
 
     xTaskCreatePinnedToCore(weight_task, "weight_task", 8192, NULL, tskIDLE_PRIORITY + 1, NULL, 1);
 
     cv_task_creator();
-}
-
-/**
- * @brief Initializes the hardware peripherals
- */
-void hw_init()
-{
-    #ifndef CONFIG_USE_MOCK_CAMERA
-    camera_init();
-    #endif
-    ultrasonic_sensor_init();
-    weight_sensor_init();
-    oled_init(I2C_NUM_0);
-    servo_init();
 }
 
 
@@ -188,44 +178,4 @@ esp_err_t wifi_init()
     ESP_LOGI("WIFI_INIT", "WiFi connected successfully");
 
     return res;
-}
-
-void send_system_status_to_api(esp_err_t camera_status, esp_err_t ultrasonic_status, esp_err_t weight_status, esp_err_t servo_status, esp_err_t wifi_status) {
-    cJSON *board_status = cJSON_CreateArray();
-    
-    cJSON *item = cJSON_CreateObject();
-    cJSON_AddStringToObject(item, "name", "ESP main module");
-    cJSON_AddStringToObject(item, "status", camera_status == ESP_OK ? "Active" : "Problem");
-    cJSON_AddStringToObject(item, "espStatus", esp_err_to_name(camera_status));
-    cJSON_AddItemToArray(board_status, item);
-    
-    item = cJSON_CreateObject();
-    cJSON_AddStringToObject(item, "name", "Ultrasonic sensor");
-    cJSON_AddStringToObject(item, "status", ultrasonic_status == ESP_OK ? "Active" : "Problem");
-    cJSON_AddStringToObject(item, "espStatus", esp_err_to_name(ultrasonic_status));
-    cJSON_AddItemToArray(board_status, item);
-    
-    item = cJSON_CreateObject();
-    cJSON_AddStringToObject(item, "name", "Weight sensor");
-    cJSON_AddStringToObject(item, "status", weight_status == ESP_OK ? "Active" : "Problem");
-    cJSON_AddStringToObject(item, "espStatus", esp_err_to_name(weight_status));
-    cJSON_AddItemToArray(board_status, item);
-    
-    item = cJSON_CreateObject();
-    cJSON_AddStringToObject(item, "name", "Motor sensor");
-    cJSON_AddStringToObject(item, "status", servo_status == ESP_OK ? "Active" : "Problem");
-    cJSON_AddStringToObject(item, "espStatus", esp_err_to_name(servo_status));
-    cJSON_AddItemToArray(board_status, item);
-    
-    item = cJSON_CreateObject();
-    cJSON_AddStringToObject(item, "name", "Wifi sensor");
-    cJSON_AddStringToObject(item, "status", wifi_status == ESP_OK ? "Active" : "Problem");
-    cJSON_AddStringToObject(item, "espStatus", esp_err_to_name(wifi_status));
-    cJSON_AddItemToArray(board_status, item);
-    
-    char *status_json = cJSON_Print(board_status);
-    https_put_status(status_json);
-
-    cJSON_Delete(board_status);
-    free(status_json);
 }
