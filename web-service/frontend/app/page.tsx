@@ -36,7 +36,25 @@ function getTimeDifference(timestamp: string): string {
 	return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
 };
 
+function useMediaQuery(query: string) {
+    const [matches, setMatches] = useState(false);
+
+    useEffect(() => {
+        const media = window.matchMedia(query);
+        if (media.matches !== matches) {
+            setMatches(media.matches);
+        }
+        const listener = () => setMatches(media.matches);
+        media.addEventListener('change', listener);
+        return () => media.removeEventListener('change', listener);
+    }, [matches, query]);
+
+    return matches;
+}
+
 export default function Home() {
+    const isSmallScreen = useMediaQuery('(max-width: 768px)');
+	
 	const [data, updateData] = useState<apiData>(
 		{
 			boardStatus: [
@@ -44,7 +62,10 @@ export default function Home() {
 			],
 			logs: [],
 			allowedPlates: [],
-			spots: [],
+			spots: Array.from({ length: 10 }, (_, i) => ({
+				id: i + 1,
+				isOccupied: false,
+			})),
 			openingTime: '08:00',
 			closingTime: '22:00',
 			initializedAt: '',
@@ -57,7 +78,7 @@ export default function Home() {
 	useEffect(() => {
 		const fetchStatus = async () => {
 			try {
-				const response = await fetch('https://tinyparkingsystem-api.vercel.app/status');
+				const response = await fetch('http://localhost:5000/status');
 				const responseData = await response.json();
 
 				updateData(responseData || {});
@@ -76,52 +97,54 @@ export default function Home() {
 	}, []);
 
     return (
-		<div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 lg:p-8">
-			<header className="mb-4 flex flex-row justify-between items-center gap-4">
-				<div>
-					<h1 className="text-4xl font-bold mb-1 tracking-tight text-slate-900 dark:text-slate-100">
-						🅿️ Tiny Parking System Dashboard
-					</h1>
-					<p className="text-lg text-muted-foreground">
-						Our project for the Embedded Software for the Internet of Things course - 2025/2026
-					</p>
-				</div>
-			</header>
+		<div className="min-h-screen flex flex-col items-center w-full p-4 sm:p-6 lg:p-8">
+			<div className="w-full max-w-[1600px]">
+				<header className="mb-3 flex flex-row justify-between items-center gap-4">
+					<div>
+						<h1 className="text-4xl font-bold mb-1 tracking-tight text-slate-900">
+							🅿️ Tiny Parking System Dashboard
+						</h1>
+						<p className="text-lg text-muted-foreground">
+							Our project for the Embedded Software for the Internet of Things course - 2025/2026
+						</p>
+					</div>
+				</header>
 
-			<main>
-				<Tabs defaultValue="info">
-					<TabsList>
-						<TabsTrigger value="info">
-							<ParkingSquareIcon className="text-blue-500" />
-							About the project
-						</TabsTrigger>
-						<TabsTrigger value="status">
-							<ActivityIcon className="text-green-500" />
-							System status
-						</TabsTrigger>
-						<TabsTrigger value="log">
-							<FileTextIcon className="text-violet-500" />
-							System log
-						</TabsTrigger>
-						<TabsTrigger value="parking">
-							<ParkingMeterIcon className="text-amber-500" />
-							Parking visualization
-						</TabsTrigger>
-					</TabsList>
-					<TabsContent value="info">
-						<ProjectInfoSection />
-					</TabsContent>
-					<TabsContent value="status">
-						<SystemStatusSection sensorData={data.boardStatus} lastUpdated={lastUpdated} timeDifference={timeDifference} />
-					</TabsContent>
-					<TabsContent value="log">
-						<SystemLogSection logsData={data.logs} />
-					</TabsContent>
-					<TabsContent value="parking">
-						<ParkingLotSection spotsData={data.spots} allowedPlates={data.allowedPlates} dataPayload={data} />
-					</TabsContent>
-				</Tabs>
-			</main>
+				<main>
+					<Tabs defaultValue="info" orientation={isSmallScreen ? "vertical" : "horizontal"}>
+						<TabsList className="mb-0.5">
+							<TabsTrigger value="info">
+								<ParkingSquareIcon className="text-blue-500" />
+								Project info
+							</TabsTrigger>
+							<TabsTrigger value="status">
+								<ActivityIcon className="text-green-500" />
+								System status
+							</TabsTrigger>
+							<TabsTrigger value="log">
+								<FileTextIcon className="text-violet-500" />
+								System log
+							</TabsTrigger>
+							<TabsTrigger value="parking">
+								<ParkingMeterIcon className="text-amber-500" />
+								Parking simulation
+							</TabsTrigger>
+						</TabsList>
+						<TabsContent value="info">
+							<ProjectInfoSection />
+						</TabsContent>
+						<TabsContent value="status">
+							<SystemStatusSection sensorData={data.boardStatus} lastUpdated={lastUpdated} timeDifference={timeDifference} />
+						</TabsContent>
+						<TabsContent value="log">
+							<SystemLogSection logsData={data.logs} />
+						</TabsContent>
+						<TabsContent value="parking">
+							<ParkingLotSection spotsData={data.spots} allowedPlates={data.allowedPlates} />
+						</TabsContent>
+					</Tabs>
+				</main>
+			</div>
 		</div>
-    );
+	);
 }

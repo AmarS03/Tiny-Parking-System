@@ -9,16 +9,16 @@ const store = {
         { name: "Weight sensor", status: "No connection", espStatus: "Awaiting system connection" },
         { name: "Motor sensor", status: "No connection", espStatus: "Awaiting system connection" },
         { name: "Wifi sensor", status: "No connection", espStatus: "Awaiting system connection" },
-        { name: "OLED Display", status: "No connection", espStatus: "Awaiting system connection" },
+        { name: "OLED display", status: "No connection", espStatus: "Awaiting system connection" },
     ],
     logs: [],
-    allowedPlates: [],
     spots: Array.from({ length: defaultParkingSpots }, (_, i) => ({
         id: i + 1,
         isOccupied: false,
         occupiedBy: '',
         occupiedAt: null,
     })),
+    allowedPlates: [],
     openingTime: "08:00",
     closingTime: "22:00",
     initializedAt: new Date().toISOString(),
@@ -43,6 +43,11 @@ function addNewLog(type, message, imageUrl = null) {
 
 function setBoardStatus(updatedStatus) {
     store.boardStatus = updatedStatus;
+    store.lastUpdatedAt = new Date().toISOString();
+}
+
+function setAllowedLicensePlates(plates) {
+    store.allowedPlates = plates;
     store.lastUpdatedAt = new Date().toISOString();
 }
 
@@ -89,6 +94,7 @@ module.exports = {
     getStore,
     addNewLog,
     setBoardStatus,
+    setAllowedLicensePlates,
     noOccupiedSpots,
     parkVehicle,
     removeParkedVehicle,
