@@ -36,6 +36,8 @@ const char *TAG = "HTTPS Task module";
 void put_status_task(void *arg) {
     ESP_LOGI(TAG, "Sending status to backend...");
     send_system_status_to_api(camera_status, ultrasonic_status, weight_status, servo_status, wifi_status, oled_status);
+
+    vTaskDelete(NULL);
 }
 
 void set_status_variables(esp_err_t camera, esp_err_t ultrasonic, esp_err_t weight, esp_err_t servo, esp_err_t wifi, esp_err_t oled) {
@@ -100,6 +102,8 @@ void send_system_status_to_api() {
 void post_entry_task(void *arg) {
     ESP_LOGI(TAG, "Sending entry request to backend...");
     send_entry_to_api();
+
+    vTaskDelete(NULL);
 }
 
 void send_entry_to_api(void) {
@@ -124,6 +128,8 @@ void set_entry_variables(char * license_plate, char * image_url, float * recorde
 void post_exit_task(void *arg) {
     ESP_LOGI(TAG, "Sending exit request to backend...");
     send_exit_to_api();
+
+    vTaskDelete();
 }
 
 void send_exit_to_api(void) {
