@@ -32,7 +32,7 @@ export function SystemLogSection(
             case 'success': return <CheckCircle2 className="h-4 w-4 text-green-500" />;
             case 'warning': return <AlertCircle className="h-4 w-4 text-orange-500" />;
             case 'error': return <AlertCircle className="h-4 w-4 text-red-500" />;
-            default: return <Info className="h-4 w-4 text-blue-500" />;
+            default: return <Info className="h-4 w-4 text-violet-500" />;
         }
     };
 
@@ -41,14 +41,14 @@ export function SystemLogSection(
             case 'success': return <span className="font-medium text-green-500">Success</span>;
             case 'warning': return <span className="font-medium text-orange-500">Warning</span>;
             case 'error': return <span className="font-medium text-red-500">Error</span>;
-            default: return <span className="font-medium text-blue-500">Info</span>;
+            default: return <span className="font-medium text-violet-500">Info</span>;
         }
     };
 
     return (
         <Card className="h-full shadow-md flex flex-col">
             <CardHeader className="pb-0">
-                <CardTitle className="flex items-center text-xl gap-2">
+                <CardTitle className="flex items-center text-2xl gap-2">
                     <FileText className="h-6 w-6 text-violet-500" />
                     System log
                 </CardTitle>
@@ -58,7 +58,7 @@ export function SystemLogSection(
                     {
                         logsData.length === 0 && (
                             <div className="text-center text-sm text-muted-foreground py-8">
-                                No activity recorded yet.
+                                No activity recorded yet. Start the ESP model to see the incoming updates!
                             </div>
                         )
                     }

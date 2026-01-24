@@ -1,9 +1,6 @@
 // Default number of parking spots
 const defaultParkingSpots = 10;
 
-// SSE subscribers for real-time logs
-const logSubscribers = new Set();
-
 // In-memory store (resets on restart)
 const store = {
     boardStatus: [
@@ -42,24 +39,6 @@ function addNewLog(type, message, imageUrl = null) {
 
     store.logs.push(logEntry);
     store.lastUpdatedAt = new Date().toISOString();
-    
-    // Notify all SSE subscribers of the new log
-    notifyLogSubscribers(logEntry);
-}
-
-function notifyLogSubscribers(logEntry) {
-    logSubscribers.forEach(res => {
-        res.write(`data: ${JSON.stringify(logEntry)}\n\n`);
-    });
-}
-
-function addLogSubscriber(res) {
-    logSubscribers.add(res);
-    
-    // Return a cleanup function
-    return () => {
-        logSubscribers.delete(res);
-    };
 }
 
 function setBoardStatus(updatedStatus) {
@@ -114,6 +93,4 @@ module.exports = {
     parkVehicle,
     removeParkedVehicle,
     isLicensePlateAllowed,
-    addLogSubscriber,
-    notifyLogSubscribers,
 };

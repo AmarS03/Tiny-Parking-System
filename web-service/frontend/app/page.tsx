@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 
 import { ProjectInfoSection } from "@/components/ProjectInfoSection";
@@ -73,8 +74,9 @@ export default function Home() {
 		const interval = setInterval(fetchStatus, 2500); // Refreshes every 2.5 seconds
 		return () => clearInterval(interval);
 	}, []);
+
     return (
-		<div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 lg:p-8 font-(family-name:--font-geist-sans)">
+		<div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 lg:p-8">
 			<header className="mb-4 flex flex-row justify-between items-center gap-4">
 				<div>
 					<h1 className="text-4xl font-bold mb-1 tracking-tight text-slate-900 dark:text-slate-100">
@@ -116,7 +118,7 @@ export default function Home() {
 						<SystemLogSection logsData={data.logs} />
 					</TabsContent>
 					<TabsContent value="parking">
-						<ParkingLotSection spotsData={data.spots} allowedPlates={data.allowedPlates} />
+						<ParkingLotSection spotsData={data.spots} allowedPlates={data.allowedPlates} dataPayload={data} />
 					</TabsContent>
 				</Tabs>
 			</main>

@@ -4,7 +4,7 @@ import { ConstructionIcon, WeightTildeIcon, WavesIcon, WifiIcon, HardDriveIcon, 
 type Sensor = {
     name: string;
     status: "No connection" | "Active" | "Problem";
-    message?: string;
+    espStatus?: string;
 };
 
 function getSensorIcon(sensorName: string, status: string) {
@@ -71,9 +71,9 @@ export function ModuleStatusCard({ sensor }: { sensor: Sensor }) {
                     {sensor.status}
                 </Badge>
             </div>
-            <div className="text-sm text-gray-600 mt-2">
+            <div className="text-xs text-gray-600 mt-2">
                 <span className="text-lg text-black font-medium">Additional info:</span><br />
-                {sensor.message || 'No additional info'}
+                {sensor.espStatus || 'No additional info'}
             </div>
         </div>
     );

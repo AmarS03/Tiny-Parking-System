@@ -24,7 +24,7 @@ export function SystemStatusSection(
     return (
         <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
             <CardHeader>
-                <CardTitle className="flex items-center text-xl gap-2">
+                <CardTitle className="flex items-center text-2xl gap-2">
                     <Activity className="h-6 w-6 text-green-500" />
                     System status
                 </CardTitle>
