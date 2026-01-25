@@ -14,11 +14,6 @@ router.post("/", (req, res, next) => {
             throw err;
         }
 		
-		addNewLog(
-			"info", 
-			`Vehicle exit detected, with license plate ${licensePlate}`
-		);
-		
         // Finds spot occupied by this licensePlate and free it
 		const freed = removeParkedVehicle(licensePlate);
 
@@ -27,12 +22,13 @@ router.post("/", (req, res, next) => {
 		// (this is because we don't have another camera sensor for exit detection)
         if (!freed && !noOccupiedSpots()) {
 			const spot = getParkingSpots.find(spot => spot.isOccupied);
+			licensePlate = spot.occupiedBy;
 			removeParkedVehicle(spot.occupiedBy);
         }
 		
 		addNewLog(
 			"success", 
-			`Vehicle exit with plate ${licensePlate} allowed`
+			`Vehicle exit detected, with license plate ${licensePlate}`
 		);
     } catch (err) {
 		addNewLog(
