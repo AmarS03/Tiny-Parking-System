@@ -9,6 +9,7 @@
 #define HTTPS_TASK_H
 
 #include "esp_err.h"
+#include <stdbool.h>
 
 void put_status_task(void *arg);
 
@@ -29,5 +30,7 @@ void set_license_plate_data(char * plate);
 void set_image_url_data(char * url);
 
 void set_weight_data(float * weight);
+
+bool get_entry_allowed(void);
 
 #endif

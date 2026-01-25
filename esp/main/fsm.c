@@ -190,9 +190,6 @@ void idle_fn() {
 void entry_fn() {
     enable_weight_detection(false);
 
-    xTaskCreate(post_entry_task, "post_entry_task", 8192, NULL, 5, NULL);
-    vTaskDelay(pdMS_TO_TICKS(5000));
-
     oled_clear();
 
     oled_print(2, "Verifying license");

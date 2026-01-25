@@ -211,15 +211,28 @@ bool https_post_entry(const char *json_payload) {
     
     print_response_buffer();
 
-    char *entry_id = NULL;
+    bool is_allowed = false;
 
     // Response handling
     if (err == ESP_OK) {
-        // TO-DO: write a proper JSON parsing logic to extract entryId!
-        entry_id = strdup(response_buffer);
+        cJSON *root = cJSON_Parse(response_buffer);
+
+        if (root == NULL) {
+            ESP_LOGE(TAG, "Failed to parse JSON response");
+            return false;
+        }
+
+        // Look for the "allowed" boolean field
+        cJSON *allowed = cJSON_GetObjectItem(root, "allowed");
+
+        if (cJSON_IsBool(allowed)) {
+            is_allowed = cJSON_IsTrue(allowed);
+        }
+
+        cJSON_Delete(root); // Always free the memory!
     }
     
-    return entry_id;
+    return is_allowed;
 }
 
 /**

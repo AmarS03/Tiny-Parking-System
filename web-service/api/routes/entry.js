@@ -18,8 +18,7 @@ router.post("/", (req, res, next) => {
         if (!isLicensePlateValid(licensePlate)) {
             addNewLog(
 				"warning", 
-				`Vehicle entry with plate ${licensePlate} denied (invalid format)`,
-				imageUrl
+				`Vehicle entry with plate ${licensePlate} denied (invalid format)`
 			);
 			
         	return res.json(
@@ -31,8 +30,7 @@ router.post("/", (req, res, next) => {
         } else if (!isLicensePlateAllowed(licensePlate)) {
             addNewLog(
 				"warning", 
-				`Vehicle entry with plate ${licensePlate} denied (not in allowed list)`,
-				imageUrl
+				`Vehicle entry with plate ${licensePlate} denied (not in allowed list)`
 			);
 			
         	return res.json(
@@ -44,11 +42,10 @@ router.post("/", (req, res, next) => {
         } else {
 			const availableSpot = parkVehicle(licensePlate);
 
-			if (availableSpot) {
+			if (!availableSpot) {
 				addNewLog(
 					"warning", 
-					`Vehicle entry with plate ${licensePlate} denied (no available parking spots)`,
-					imageUrl
+					`Vehicle entry with plate ${licensePlate} denied (no available parking spots)`
 				);
 				
 				return res.json(
@@ -60,8 +57,7 @@ router.post("/", (req, res, next) => {
 			} else {
 				addNewLog(
 					"success", 
-					`Vehicle entry with plate ${licensePlate} allowed`,
-					imageUrl
+					`Vehicle entry with plate ${licensePlate} allowed`
 				);
 				
 				return res.json(

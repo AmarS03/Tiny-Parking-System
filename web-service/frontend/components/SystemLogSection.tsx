@@ -64,7 +64,7 @@ export function SystemLogSection(
                     }
                     {
                         [...logsData].reverse().map((log, index) => (
-                            <div key={index} className="flex gap-8 items-start text-sm border-b pb-2 last:border-0">
+                            <div key={index} className="flex text-sm border-b pb-2 gap-8 last:border-0">
                                 <div className='flex flex-col'>
                                     <div className='flex flex-row gap-1 items-center'>
                                         {getIcon(log.type)}
@@ -74,7 +74,7 @@ export function SystemLogSection(
                                         {formatDate(log.timestamp)}
                                     </span>
                                 </div>
-                                <div className='flex flex-col gap-2'>
+                                <div className='flex flex-col items-start gap-2'>
                                     <span className="text-foreground/90 text-lg font-normal mt-0.5">
                                         {log.message}
                                     </span>
@@ -82,8 +82,7 @@ export function SystemLogSection(
                                         <img 
                                             src={log.imageUrl} 
                                             alt="Log preview" 
-                                            className="h-64"
-                                            crossOrigin="anonymous"
+                                            className="h-64 object-contain"
                                         />
                                     )}
                                 </div>

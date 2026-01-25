@@ -143,3 +143,7 @@ void set_image_url_data(char *url) {
 void set_weight_data(float *weight) {
     recorded_weight = *weight;
 }
+
+bool get_entry_allowed(void) {
+    return entryAllowed;
+}
