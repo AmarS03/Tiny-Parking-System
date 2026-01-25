@@ -24,6 +24,4 @@ esp_err_t wifi_init();
 
 esp_err_t servo_init(void);
 
-void send_system_status_to_api(esp_err_t camera_status, esp_err_t ultrasonic_status, esp_err_t weight_status, esp_err_t servo_status, esp_err_t wifi_status);
-
 #endif /* INIT_H */
