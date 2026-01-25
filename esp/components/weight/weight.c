@@ -20,8 +20,8 @@
 #define TAG "WEIGHT"
 
 // Weight sensor pin definitions
-#define HX711_DOUT_GPIO  GPIO_NUM_21
-#define HX711_CLK_GPIO   GPIO_NUM_14
+#define HX711_DOUT_GPIO  GPIO_NUM_12
+#define HX711_CLK_GPIO   GPIO_NUM_13
 
 // Detection parameters
 #define NOISE_THRESHOLD          5.0f

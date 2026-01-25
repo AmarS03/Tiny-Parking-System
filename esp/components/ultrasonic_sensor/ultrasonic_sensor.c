@@ -16,8 +16,8 @@
 #include <sys/param.h>
 
 // Ultrasonic sensor pin definitions
-#define TRIG_GPIO   GPIO_NUM_3
-#define ECHO_GPIO   GPIO_NUM_20
+#define TRIG_GPIO   GPIO_NUM_4
+#define ECHO_GPIO   GPIO_NUM_5
 
 #define MAX_DISTANCE 50
 #define THRESHOLD_DISTANCE 10
