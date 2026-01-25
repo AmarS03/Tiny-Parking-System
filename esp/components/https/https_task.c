@@ -115,15 +115,6 @@ void send_entry_to_api(void) {
     free(entry_json);
 }
 
-void set_license_plate_data(char * license_plate, char * image_url) {
-    license_plate = license_plate;
-    image_url = image_url;
-}
-
-void set_weight_data(float * recorded_weight) {
-    recorded_weight = recorded_weight;
-}
-
 void post_exit_task(void *arg) {
     ESP_LOGI(TAG, "Sending exit request to backend...");
     send_exit_to_api();
@@ -141,6 +132,14 @@ void send_exit_to_api(void) {
     free(exit_json);
 }
 
-void set_exit_variables(char * license_plate) {
-    license_plate = license_plate;
+void set_license_plate_data(char *plate) {
+    license_plate = plate;
+}
+
+void set_image_url_data(char *url) {
+    image_url = url;
+}
+
+void set_weight_data(float *weight) {
+    recorded_weight = *weight;
 }

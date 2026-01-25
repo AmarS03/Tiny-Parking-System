@@ -24,11 +24,11 @@ static SSD1306_t dev;
 esp_err_t oled_init(i2c_port_t i2c_port)
 {
     // Initialize I2C master
+    dev._i2c_num = i2c_port;
     i2c_master_init(&dev, OLED_SDA_GPIO, OLED_SCL_GPIO, -1);
 
     // Initialize SSD1306 (I2C, 128x64)
     ssd1306_init(&dev, 128, 64);
-
     ssd1306_clear_screen(&dev, false);
     ssd1306_contrast(&dev, 0xFF);
 

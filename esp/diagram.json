@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "author": "Anonymous maker",
+  "author": "Tiny Parking System team",
   "editor": "wokwi",
   "parts": [
     {
@@ -44,21 +44,21 @@
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
     [ "esp:RX", "$serialMonitor:TX", "", [] ],
-    [ "esp:5V", "ultrasonic1:VCC", "red", [ "h0" ] ],
-    [ "ultrasonic1:GND", "esp:GND.1", "black", [ "v0" ] ],
-    [ "ultrasonic1:TRIG", "esp:3", "green", [ "v0" ] ],
-    [ "ultrasonic1:ECHO", "esp:20", "green", [ "v0" ] ],
-    [ "cell1:VCC", "esp:3V3.1", "red", [ "h0" ] ],
-    [ "cell1:GND", "esp:GND.2", "black", [ "h0" ] ],
-    [ "cell1:DT", "esp:21", "green", [ "h0" ] ],
-    [ "cell1:SCK", "esp:14", "green", [ "h0" ] ],
-    [ "esp:1", "servo1:PWM", "green", [ "h0" ] ],
-    [ "esp:GND.2", "servo1:GND", "black", [ "v0" ] ],
-    [ "esp:5V", "servo1:VCC", "red", [ "v0" ] ],
     [ "oled1:VCC", "esp:3V3.2", "red", [ "v0" ] ],
     [ "oled1:GND", "esp:GND.4", "black", [ "v0" ] ],
-    [ "oled1:SDA", "esp:42", "green", [ "v0" ] ],
-    [ "oled1:SCL", "esp:41", "green", [ "v0" ] ]
+    [ "oled1:SDA", "esp:9", "green", [ "v0" ] ],
+    [ "oled1:SCL", "esp:8", "green", [ "v0" ] ],
+    [ "esp:5V", "ultrasonic1:VCC", "red", [ "h0" ] ],
+    [ "ultrasonic1:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "ultrasonic1:TRIG", "esp:4", "green", [ "v0" ] ],
+    [ "ultrasonic1:ECHO", "esp:5", "green", [ "v0" ] ],
+    [ "cell1:VCC", "esp:3V3.1", "red", [ "h0" ] ],
+    [ "cell1:GND", "esp:GND.2", "black", [ "h0" ] ],
+    [ "cell1:DT", "esp:12", "green", [ "h0" ] ],
+    [ "cell1:SCK", "esp:13", "green", [ "h0" ] ],
+    [ "esp:18", "servo1:PWM", "green", [ "h0" ] ],
+    [ "esp:GND.2", "servo1:GND", "black", [ "v0" ] ],
+    [ "esp:5V", "servo1:VCC", "red", [ "v0" ] ]
   ],
   "dependencies": {}
 }

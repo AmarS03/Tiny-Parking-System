@@ -73,7 +73,7 @@ void system_init()
     esp_err_t ultrasonic_status = ultrasonic_sensor_init();
     esp_err_t weight_status = weight_sensor_init();
     esp_err_t servo_status = servo_init();
-    esp_err_t oled_status = oled_init(I2C_NUM_0);
+    esp_err_t oled_status = oled_init(I2C_NUM_1);
     
     set_status_variables(camera_status, ultrasonic_status, weight_status, servo_status, wifi_status, oled_status);
 

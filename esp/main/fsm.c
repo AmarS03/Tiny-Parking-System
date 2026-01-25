@@ -298,7 +298,7 @@ void exit_fn() {
     ESP_LOGI("EXIT", "Vehicle passed. Closing gate...");
 
     // Send exit notification to backend
-    set_exit_variables(NULL);
+    set_license_plate_data("invalid_plate");
     xTaskCreate(post_exit_task, "post_exit_task", 8192, NULL, 5, NULL);
     vTaskDelay(pdMS_TO_TICKS(5000));
 

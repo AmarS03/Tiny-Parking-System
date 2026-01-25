@@ -20,14 +20,14 @@ void post_entry_task(void *arg);
 
 void send_entry_to_api(void);
 
-void set_license_plate_data(char * license_plate, char * image_url);
-
-void set_weight_data(float * recorded_weight);
-
 void post_exit_task(void *arg);
 
 void send_exit_to_api(void);
 
-void set_exit_variables(char * license_plate);
+void set_license_plate_data(char * plate);
+
+void set_image_url_data(char * url);
+
+void set_weight_data(float * weight);
 
 #endif

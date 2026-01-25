@@ -134,5 +134,5 @@ direct_dependencies:
 - idf
 - nopnop2002/ssd1306
 manifest_hash: 53dc7285e58fb6327bac3337ff8c2dd31edb4c20149fe9de17e0bb3864f3b02d
-target: esp32
+target: esp32s3
 version: 2.0.0

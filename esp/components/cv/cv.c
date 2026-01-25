@@ -354,7 +354,8 @@ void recognition_task(void *arg)
         if (plate != NULL && image_link != NULL) {
             ESP_LOGI(TAG, "===== PLATE DETECTED: %s =====", plate);
             ESP_LOGI(TAG, "===== IMAGE LINK: %s =====", image_link);
-            set_license_plate_data((char*) plate, (char*) image_link);
+            set_license_plate_data((char*) plate);
+            set_image_url_data((char*) image_link);
 
             fsm_handle_event(PLATE_RECOGNIZED);
         } else {
