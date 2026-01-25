@@ -14,14 +14,14 @@ router.put("/", (req, res, next) => {
             addNewLog("info", "Allowed license plates list updated");
             res.json({ message: "Allowed license plates list updated" });
         } else {
-            const err = new Error("Invalid allowed license plates payload");
+            const err = new Error("API error: invalid 'allowedPlates' payload for PUT /status/allowed");
             err.status = 400;
             throw err;
         }
     } catch (err) {
         addNewLog(
             "error", 
-            `API error on PUT /status/allowed: ${err.message}`
+            `API error when requesting PUT /status/allowed: ${err.message}`
         );
 
         next(err);

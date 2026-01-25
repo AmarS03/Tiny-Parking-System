@@ -28,12 +28,18 @@ router.post("/", (req, res, next) => {
 		
 		addNewLog(
 			"success", 
-			`Vehicle exit detected, with license plate ${licensePlate}`
+			`Vehicle with license plate ${licensePlate} exiting the parking lot`
+		);
+		
+		return res.json(
+			{
+				message: `Vehicle exit successful`
+			}
 		);
     } catch (err) {
 		addNewLog(
 			"error", 
-			`API error on POST /exit: ${err.message}`
+			`API error when requesting POST /exit: ${err.message}`
 		);
 		
         next(err);

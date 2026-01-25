@@ -11,26 +11,26 @@ router.post("/", (req, res, next) => {
 	
 		addNewLog(
 			"info", 
-			`Vehicle entry detected, with license plate ${licensePlate} and weight ${recordedWeight}`,
+			`Vehicle entering the parking lot (License plate: ${licensePlate} - Weight ${recordedWeight})`,
 			imageUrl
 		);
 
         if (!isLicensePlateValid(licensePlate)) {
             addNewLog(
 				"warning", 
-				`Vehicle entry with plate ${licensePlate} denied (invalid format)`
+				`Vehicle entry denied: invalid license plate format`
 			);
 			
         	return res.json(
 				{
 					allowed: false,
-					message: `Invalid license plate`
+					message: `Invalid license plate format`
 				}
 			);
         } else if (!isLicensePlateAllowed(licensePlate)) {
             addNewLog(
 				"warning", 
-				`Vehicle entry with plate ${licensePlate} denied (not in allowed list)`
+				`Vehicle entry denied: not in allowed list`
 			);
 			
         	return res.json(
@@ -45,7 +45,7 @@ router.post("/", (req, res, next) => {
 			if (!availableSpot) {
 				addNewLog(
 					"warning", 
-					`Vehicle entry with plate ${licensePlate} denied (no available parking spots)`
+				`Vehicle entry denied: no available parking spots`
 				);
 				
 				return res.json(
@@ -71,7 +71,7 @@ router.post("/", (req, res, next) => {
     } catch (err) {
 		addNewLog(
 			"error", 
-			`API error on POST /entry: ${err.message}`
+			`API error when requesting POST /entry: ${err.message}`
 		);
 		
         next(err);

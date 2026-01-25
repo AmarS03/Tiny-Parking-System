@@ -189,7 +189,9 @@ bool weight_detect_vehicle(void)
 
         if (detect_count >= DETECT_COUNT_REQUIRED) {
             ESP_LOGI(TAG, "Vehicle detected: %.1f g", filtered);
-            set_weight_data(&filtered);
+
+            float rounded = roundf(filtered * 10.0f) / 10.0f;
+            set_weight_data(&rounded);
             detect_count = 0;
 
             return true;

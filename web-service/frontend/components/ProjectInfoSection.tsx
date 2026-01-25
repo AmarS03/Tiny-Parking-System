@@ -3,6 +3,7 @@
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { ActivityIcon, FileTextIcon, ParkingMeterIcon, ParkingSquareIcon } from 'lucide-react';
 
+
 export function ProjectInfoSection() {
     return (
         <Card className="h-full shadow-md hover:shadow-lg transition-shadow">

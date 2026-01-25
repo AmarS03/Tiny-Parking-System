@@ -10,7 +10,7 @@ router.get("/", (req, res, next) => {
     } catch (err) {
 		addNewLog(
 			"error", 
-			`API error on GET /status: ${err.message}`
+			`API error when requesting GET /status: ${err.message}`
 		);
 		
         next(err);
@@ -23,7 +23,7 @@ router.put("/", (req, res, next) => {
         const updatedStatus = req.body;
 
         if (!updatedStatus) {
-            const err = new Error("Invalid system status payload");
+            const err = new Error("API error: invalid system status payload");
             err.status = 400;
             throw err;
         } else {
@@ -34,7 +34,7 @@ router.put("/", (req, res, next) => {
     } catch (err) {
 		addNewLog(
 			"error", 
-			`API error on PUT /status: ${err.message}`
+			`API error when requesting PUT /status: ${err.message}`
 		);
 		
         next(err);
