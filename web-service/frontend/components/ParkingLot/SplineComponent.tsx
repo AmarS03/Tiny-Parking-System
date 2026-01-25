@@ -27,12 +27,12 @@ const SplineComponent = forwardRef<SplineComponentHandle>((props, ref) => {
 
     function triggerEntryAnimation(carNum: number) {
         console.log(`Triggering entry animation for car ${carNum}`);
-        spline.current?.emitEvent('keyUp', `Car ${carNum}`);
+        spline.current?.emitEvent('keyDown', `Car ${carNum}`);
     }
 
     function triggerExitAnimation(carNum: number) {
         console.log(`Triggering exit animation for car ${carNum}`);
-        spline.current?.emitEvent('keyDown', `Car ${carNum}`);
+        spline.current?.emitEvent('keyUp', `Car ${carNum}`);
     }
 
     // Expose functions via ref

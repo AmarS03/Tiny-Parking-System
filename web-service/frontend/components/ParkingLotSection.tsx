@@ -55,13 +55,11 @@ export function ParkingLotSection({
                 if (previousSpot) {
                     // ENTRY detected: Was free, now occupied
                     if (!previousSpot.isOccupied && currentSpot.isOccupied) {
-                        console.log("Vehicle has entered the parking spot #", currentSpot.id);
                         splineRef.current?.triggerEntryAnimation(previousSpot.id);
                     }
                     
                     // EXIT detected: Was occupied, now free
                     if (previousSpot.isOccupied && !currentSpot.isOccupied) {
-                        console.log("Vehicle has exited the parking spot #", currentSpot.id);
                         splineRef.current?.triggerExitAnimation(previousSpot.id);
                     }
                 }
