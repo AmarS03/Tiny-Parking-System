@@ -23,9 +23,7 @@ static esp_err_t oled_status;
 static char * license_plate;
 static char * image_url;
 static float recorded_weight;
-
-// Response payload variable
-static char * payload;
+static bool entryAllowed;
 
 const char *TAG = "HTTPS Task module";
 
@@ -36,6 +34,7 @@ const char *TAG = "HTTPS Task module";
 void put_status_task(void *arg) {
     ESP_LOGI(TAG, "Sending status to backend...");
     send_system_status_to_api(camera_status, ultrasonic_status, weight_status, servo_status, wifi_status, oled_status);
+    vTaskDelete(NULL);
 }
 
 void set_status_variables(esp_err_t camera, esp_err_t ultrasonic, esp_err_t weight, esp_err_t servo, esp_err_t wifi, esp_err_t oled) {
@@ -100,6 +99,7 @@ void send_system_status_to_api() {
 void post_entry_task(void *arg) {
     ESP_LOGI(TAG, "Sending entry request to backend...");
     send_entry_to_api();
+    vTaskDelete(NULL);
 }
 
 void send_entry_to_api(void) {
@@ -109,21 +109,25 @@ void send_entry_to_api(void) {
     cJSON_AddNumberToObject(entry_payload, "recordedWeight", recorded_weight);
     
     char *entry_json = cJSON_Print(entry_payload);
-    https_post_entry(entry_json);
+    entryAllowed = https_post_entry(entry_json);
     
     cJSON_Delete(entry_payload);
     free(entry_json);
 }
 
-void set_entry_variables(char * license_plate, char * image_url, float * recorded_weight) {
+void set_license_plate_data(char * license_plate, char * image_url) {
     license_plate = license_plate;
     image_url = image_url;
+}
+
+void set_weight_data(float * recorded_weight) {
     recorded_weight = recorded_weight;
 }
 
 void post_exit_task(void *arg) {
     ESP_LOGI(TAG, "Sending exit request to backend...");
     send_exit_to_api();
+    vTaskDelete(NULL);
 }
 
 void send_exit_to_api(void) {
@@ -131,7 +135,7 @@ void send_exit_to_api(void) {
     cJSON_AddStringToObject(exit_payload, "licensePlate", license_plate);
     
     char *exit_json = cJSON_Print(exit_payload);
-    https_post_entry(exit_json);
+    https_post_exit(exit_json);
     
     cJSON_Delete(exit_payload);
     free(exit_json);

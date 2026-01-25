@@ -1,5 +1,5 @@
 const express = require("express");
-const { store } = require("../lib/data");
+const { addNewLog, getParkingSpots } = require("../lib/data");
 
 const router = express.Router();
 
@@ -26,7 +26,7 @@ router.post("/", (req, res, next) => {
 		// is not found, we simulate the exit by removing a random spot instead
 		// (this is because we don't have another camera sensor for exit detection)
         if (!freed && !noOccupiedSpots()) {
-			const spot = store.spots.find(spot => spot.isOccupied);
+			const spot = getParkingSpots.find(spot => spot.isOccupied);
 			removeParkedVehicle(spot.occupiedBy);
         }
 		

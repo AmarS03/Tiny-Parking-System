@@ -83,7 +83,7 @@ export function ProjectInfoSection() {
                     </div>
                 </div>
 
-                <div className="space-y-2 pt-2 border-t">
+                <div className="space-y-1 pt-6 border-t">
                     <p className="text-xs text-gray-600 dark:text-gray-400">
                         <strong>Course:</strong> Embedded Software for the Internet of Things
                     </p>

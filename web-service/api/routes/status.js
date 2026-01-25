@@ -1,5 +1,5 @@
 const express = require("express");
-const { getStore, setBoardStatus, addNewLog } = require("../lib/data");
+const { addNewLog, getStore, setBoardStatus } = require("../lib/data");
 
 const router = express.Router();
 
