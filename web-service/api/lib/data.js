@@ -51,6 +51,14 @@ function setAllowedLicensePlates(plates) {
     store.lastUpdatedAt = new Date().toISOString();
 }
 
+function isLicensePlateAllowed(licensePlate) {
+    return store.allowedPlates.includes(licensePlate);
+}
+
+function getParkingSpots() {
+    return store.spots;
+}
+
 function noOccupiedSpots() {
     return store.spots.every(spot => !spot.isOccupied);
 }
@@ -85,18 +93,15 @@ function removeParkedVehicle(licensePlate) {
     }
 }
 
-function isLicensePlateAllowed(licensePlate) {
-    return store.allowedPlates.includes(licensePlate);
-}
-
 module.exports = {
     defaultParkingSpots,
     getStore,
     addNewLog,
     setBoardStatus,
     setAllowedLicensePlates,
+    isLicensePlateAllowed,
+    getParkingSpots,
     noOccupiedSpots,
     parkVehicle,
     removeParkedVehicle,
-    isLicensePlateAllowed,
 };

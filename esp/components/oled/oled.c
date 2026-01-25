@@ -21,7 +21,7 @@ static SSD1306_t dev;
  * @brief Initializes the OLED display over I2C
  * @param i2c_port The I2C port number to use
  */
-void oled_init(i2c_port_t i2c_port)
+esp_err_t oled_init(i2c_port_t i2c_port)
 {
     // Initialize I2C master
     i2c_master_init(&dev, OLED_SDA_GPIO, OLED_SCL_GPIO, -1);
@@ -33,6 +33,8 @@ void oled_init(i2c_port_t i2c_port)
     ssd1306_contrast(&dev, 0xFF);
 
     ESP_LOGI(TAG, "SSD1306 initialized");
+
+    return ESP_OK;
 }
 
 void oled_clear(void)
