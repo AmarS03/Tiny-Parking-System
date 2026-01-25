@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tiny Parking System - API</title>
-    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <style>
         * {
             margin: 0;
@@ -154,6 +154,18 @@
                     </code>
                     <p>
                         Updates the status of the ESP microcontroller, the parking info and its sensors
+                    </p>
+                </div>
+                
+                <div class="endpoint" data-href="/allowed">
+                    <span class="method put">
+                        PUT
+                    </span>
+                    <code>
+                        /allowed
+                    </code>
+                    <p>
+                        Updates the list of allowed license plates, which can enter the parking lot
                     </p>
                 </div>
                 

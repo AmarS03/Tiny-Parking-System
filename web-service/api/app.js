@@ -1,12 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+
 const statusRouter = require('./routes/status');
+const allowedRouter = require('./routes/allowed');
 const entryRouter = require('./routes/entry');
 const exitRouter = require('./routes/exit');
 
 const port = process.env.PORT || 5000;
-
 const app = express();
 
 // CORS configuration
@@ -19,9 +20,11 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'static')));
 app.get('/', (_, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 app.use('/status', statusRouter);
+app.use('/allowed', allowedRouter);
 app.use('/entry', entryRouter);
 app.use('/exit', exitRouter);
 

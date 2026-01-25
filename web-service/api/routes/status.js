@@ -28,8 +28,8 @@ router.put("/", (req, res, next) => {
             throw err;
         } else {
             setBoardStatus(updatedStatus);
-            addNewLog("info", "System started");
-            res.json({ message: "System started" });
+            addNewLog("info", "ESP system started");
+            res.json({ message: "ESP system started" });
         }
     } catch (err) {
 		addNewLog(

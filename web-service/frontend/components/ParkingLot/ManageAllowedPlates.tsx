@@ -22,11 +22,9 @@ const PLATE_REGEX = /^[A-Z0-9]{7}$/i;
 
 export default function ManageAllowedPlates(
     {
-        allowedPlates,
-        dataPayload
+        allowedPlates
     } : {
-        allowedPlates: string[],
-        dataPayload: any
+        allowedPlates: string[]
     }
 ) {
     const [plates, setPlates] = useState<string[]>(allowedPlates || []);
@@ -69,27 +67,21 @@ export default function ManageAllowedPlates(
         setUpdating(true);
 
         try {
-            // Update only the allowedPlates field
-            const updatedStatus = {
-                ...dataPayload,
-                allowedPlates: plates
-            };
-
             // Send the updated status back
-            const putResponse = await fetch('https://tinyparkingsystem-api.vercel.app/status', {
+            const putResponse = await fetch('https://tinyparkingsystem-api.vercel.app/allowed', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(updatedStatus),
+                body: JSON.stringify({ allowedPlates: plates }),
             });
 
             if (!putResponse.ok) {
                 throw new Error('Failed to update allowed plates');
+            } else {
+                setOpen(false);
+                window.location.reload();
             }
-
-            // Close dialog on success
-            setOpen(false);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to save changes');
         }
