@@ -1,5 +1,5 @@
 const express = require("express");
-const { addNewLog, removeParkedVehicle, getParkingSpots } = require("../lib/data");
+const { addNewLog, removeParkedVehicle, noOccupiedSpots, getParkingSpots } = require("../lib/data");
 
 const router = express.Router();
 
