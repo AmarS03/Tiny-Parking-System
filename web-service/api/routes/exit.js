@@ -6,7 +6,7 @@ const router = express.Router();
 // POST /exit - mark spot as freed by license plate (simple helper endpoint)
 router.post("/", (req, res, next) => {
     try {
-        const { licensePlate } = req.body;
+        let { licensePlate } = req.body;
 	
         if (!licensePlate) {
             const err = new Error("Invalid exit payload (no license plate)");
