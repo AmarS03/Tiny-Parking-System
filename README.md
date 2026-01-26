@@ -77,19 +77,18 @@ Our work is based on the knowledge we've gained in the last 3 years, with most o
 
 ### State diagram
 
-![alt text](images\FSM.png)
+![alt text](images/FSM.png)
 
-A finite state machine handles the behaviour of the whole system as a separate, non-blocking task. The FSM manages state transitions based on sensor events (such as vehicle detection, license plate recognition, and exit signals) and controls the barrier, and display updates accordingly. The system optimizes power consumption by entering a low-power sleep mode when is in idle, othewise run the computer vision processing task when detect a vehicle and the exit task if it's detected by the ultrasonic sensor.
+A finite state machine handles the behaviour of the whole system as a separate, non-blocking task. The FSM manages state transitions based on sensor events (such as vehicle detection, license plate recognition, and exit signals), controls the barrier, and display updates accordingly. The system optimizes power consumption by entering a low-power sleep mode when  idle, otherwise notifies and creates the appropriate task based on the logic displayed above.
 
-### User cases flow diagram
-![alt text](images\FlowDiagram.png)
+### Use cases flow diagram
+![alt text](images/FlowDiagram.png)
 
 The User Flow Diagram above illustrates the logical sequence executed by the system from the moment a vehicle approaches the entrance. The process is divided into three main stages: detection, authentication, and execution.
 
 1.  **Vehicle Detection & Classification:**
     * The process begins with **Vehicle Arrival**. The system first performs a **Weight Detection** check.
-    * **Decision:** If the weight is invalid (e.g., a pedestrian or a heavy truck), the system immediately triggers the **Refuse Entry** state, displays a refusal message, and resets.
-    * If the weight is valid (recognized as a car), the system proceeds to the next stage.
+    * **Decision:** If the weight is valid (recognized as a car), the system proceeds to the next stage, otherwise it remains idle.
 
 2.  **Authentication (ANPR):**
     * The camera activates to **Scan the license plate**. The image is sent to the **ANPR Cloud Service** for processing.
@@ -107,7 +106,7 @@ The User Flow Diagram above illustrates the logical sequence executed by the sys
 ### General features
 
 - If the parking lot is full, the system will prevent the opening of the entrance barrier, thereby blocking vehicle access.
-- An Oled display continiously show information about the number of available parking lots, and the state in the process during entrance and exit.
+- An OLED display continiously shows information about the number of available parking lots, and the state in the process during entrance and exit.
 ### Vehicle Entry and Exit Management
 - Sensors will be installed at both the entrance (a weight sensor) and exit (a ultrasonic sensor) points to detect vehicles passing through.
 - Simultaneously, the counter of free parking spots will be incremented or decremented according to the flow of vehicles.
@@ -115,7 +114,7 @@ The User Flow Diagram above illustrates the logical sequence executed by the sys
 ### Sensors and Object Type Discrimination
 
 - To discriminate between vehicles (cars, trucks) and other presences (e.g., pedestrians) at the entrance, a weight sensor will be used.
-- The entrance barrier will lift only in the presence of a vehicle identified as a car, preventing unintended openings for trucks or pedestrians (this feature is given by the use of a treashold positioned at a logical level on the weight sensor).
+- The entrance barrier will lift only in the presence of a vehicle identified as a car, preventing unintended openings for trucks or pedestrians (this feature is given by the use of a threshold positioned at a logical level on the weight sensor).
 - An ultrasonic sensor will be used to detect cars exiting and will safely raise the barrier (Naturally, all vehicles inside the lot can exit freely).
 
 ### Access Constraints for Heavy Vehicles
@@ -124,8 +123,8 @@ The User Flow Diagram above illustrates the logical sequence executed by the sys
 
 ### Computer Vision
 
-- A camera sensor captures the front of the car, and thanks to a computer vision model, extracts the license plate to keep track of who enters the parking lots. This is a new information to store in our dataset.
-- We have a dataset of the cars (license plates) allowed to access the parking. When a car try to enter, if its license plate is not in the database, the barrier will not lift.
+- A camera sensor captures the front of the car, and thanks to a computer vision model, extracts the license plate to keep track of who enters the parking lot.
+- We have a dataset of the cars (license plates) allowed to access the parking. When a car tries to enter, if its license plate is not in the database, the barrier will not lift.
 
 ### Online Dashboard
 
@@ -388,7 +387,7 @@ The sensors and modules used for this project are:
 - 1x Ultrasonic sensor (HC-SR04)
 - 1x weight sensors (HX711)
 - 1x servo motor (SG90)
-- 1x oled display (SSD1306)
+- 1x OLED display (SSD1306)
 - 1x OV3660 camera
 
 #### Pinout
@@ -453,10 +452,10 @@ Once everything is setup properly simply run the following command:
 
 ## Web Service and Dashboard
 We also developed a web service in order to have an online live dashboard which allows the user to navigate between 4 different main sections:
-1. Homepage (Project info): here in this section it is a complete overview of the project from the initial idea to the documentation for starting the project and what it needs in term of harware, to the link of the video and all the other information about the project
-2. System status: here you can see in real time the actual various module statuses, which are updated on each initialization and show the corresponding status and eventual error code if something goes wrong.
-3. System log: here you can see all logged events happening in real time, from the system initialization to the event of vehicle entering/exiting, including the captured image (elaborated by the CV algorithm) with the corresponding plate number for entry requests.
-4. Parking simulation: here you can preview a realtime 3D model and a grid view of the current parking lot status (showing the vehicles plate in the current parked spots), which updates whenever a vehicle enters or exits the parking lot with dedicated animations too. In this section you also have the ability to add and remove any plate number which is allowed to enter in the parking lot.
+1. **Homepage** (Project info): this section provides a complete overview of the project from the initial idea to the documentation for starting the project and what it needs in term of harware, to the link of the video and all the other information about the project
+2. **System status**: here you can see in real time the actual various module statuses, which are updated on each initialization and show the corresponding status and eventual error code if something goes wrong.
+3. **System log**: here you can see all logged events happening in real time, from the system initialization to the event of vehicle entering/exiting, including the captured image (elaborated by the CV algorithm) with the corresponding plate number for entry requests.
+4. **Parking simulation**: this section offers a realtime 3D model and a grid view of the current parking lot status (showing the vehicles plate in the current parked spots), which updates whenever a vehicle enters or exits the parking lot with dedicated animations too. In this section you also have the ability to add and remove any plate number which is allowed to enter in the parking lot.
 
 ## Wokwi Simulation
 - The project also offers the possibility to test the whole system without having any additional hardware, thanks to the integration with [Wokwi](https://wokwi.com/). This allows the user to prototype and test fast and remotely.
@@ -472,7 +471,7 @@ We also developed a web service in order to have an online live dashboard which 
 
 1. Two or more vehicles cannot enter and exit the parking lot simultaneously. This does not obviously reflect real life parking lots, where we have two separate lanes. The reason is simply the budget limitation to buy double the amount of equipment (barriers, motors, weight sensors, ultrasound sensors...), just to resolve this small issue. So we simply imposed that one vehicle can only enter or exit at a time.
 
-1. Vehicle exiting from the parking lot should also be recognized with a secondary camera. Due to the budget limitation, we opted for a manual removal instead by simulating the process and randomly removing one of the parked vehicle.
+2. Vehicle exiting from the parking lot should also be recognized with a secondary camera. Due to the budget limitation, we opted for a manual removal instead by simulating the process and randomly removing one of the parked vehicle.
 
 ## Testing
 To ensure the reliability of the system, we adopted a bottom-up testing strategy: validating individual hardware components first, and then verifying the overall system logic.
@@ -485,7 +484,7 @@ Before deploying the code onto the physical hardware, we utilized the Wokwi simu
 
 ### Testing the sensors
 
-Thanks to our modular project structure, where each driver resides in its own dedicated component folder (e.g., cv, servo_motor, weight), we were simple able to use methods to perform testing on each sensors. in fact we created a module called "init" were we initialize and calibrate the sensor before running the fsm.
+Thanks to our modular project structure, where each driver resides in its own dedicated component folder (e.g., cv, servo_motor, weight), we were able to simply use methods to perform testing on each sensors. in fact we created a module called "init" were we initialize and calibrate the sensor before running the fsm.
 
 Key findings and calibrations performed during this phase included:
 - Camera Module: During the image acquisition tests, we discovered that the physical mounting position of the camera resulted in vertically flipped images. We implemented a software correction (vertical flip configuration) during the driver initialization to ensure the ANPR cloud service receives correctly oriented images.
@@ -512,8 +511,9 @@ Adopting a Service-Oriented Architecture (SOA) and using the ESP-IDF Component M
 ### Power Management and Optimization
 
 The system goes beyond pure functionality by integrating energy efficiency logic typical of real-world embedded systems. By implementing Low-Power Sleep modes when the system is in idle, and activating high-computation tasks (such as Computer Vision) only upon specific events (vehicle detection), we demonstrated conscious and efficient management of the microcontroller's resources.
+Our decision to push the CV task to the cloud, rather than processing everything on the edge device, proved to be efficient in terms of power consumption and computational demand.
 
-### Sensor Fusion and Security
+### Sensor Interoperability and Security
 
 A key strength of the project is the combined use of different sensor types to ensure secure and correct access control:
 - Object Type Discrimination: The combination of the weight sensor and logical thresholds prevents the barrier from opening for pedestrians or unauthorized vehicles (e.g., heavy trucks), simulating realistic security scenarios.
@@ -523,7 +523,7 @@ A key strength of the project is the combined use of different sensor types to e
 The project identifies limits imposed by budget and hardware (such as the single gate bottleneck for both entry/exit and the manual simulation of the exit process). However, the software infrastructure was designed to be hardware-agnostic: the use of REST APIs and standard protocols would allow, given a higher budget, easy scaling to a double gate system or industrial hardware without rewriting the core logic.
 
 ### Educational Value
-The project synthesizes the skills acquired over the  and more, demonstrating mastery in:
+The project synthesizes the skills acquired over the semester and more, demonstrating mastery in:
 - Hardware/Software Debugging: Managing serial protocols, sensor calibration (weight), and configuring complex peripherals (PSRAM, Camera).
 - Interoperability: Effective communication between the microcontroller and web/cloud services.
 - Rapid Prototyping: Leveraging simulation tools like Wokwi for development parallel to the physical hardware setup.
