@@ -1,10 +1,10 @@
 import { Badge } from '@/components/ui/badge';
-import { Construction, WeightTilde, Waves, Wifi, HardDrive, CheckIcon, XIcon, HelpCircle } from 'lucide-react';
+import { ConstructionIcon, WeightTildeIcon, WavesIcon, WifiIcon, HardDriveIcon, CheckIcon, XIcon, HelpCircleIcon, TvMinimalIcon } from 'lucide-react';
 
 type Sensor = {
     name: string;
     status: "No connection" | "Active" | "Problem";
-    message?: string;
+    espStatus?: string;
 };
 
 function getSensorIcon(sensorName: string, status: string) {
@@ -15,18 +15,20 @@ function getSensorIcon(sensorName: string, status: string) {
     const iconColor = status === 'Active' ? 'text-green-500' : status === 'Problem' ? 'text-red-500' : 'text-yellow-500';
     
     switch (normalizedName) {
-        case 'motor sensor':
-            return <Construction className={`w-${width} h-${height} ${iconColor}`} />;
-        case 'weight sensor':
-            return <WeightTilde className={`w-${width} h-${height} ${iconColor}`} />;
-        case 'ultrasonic sensor':
-            return <Waves className={`w-${width} h-${height} ${iconColor}`} />;
-        case 'wifi sensor':
-            return <Wifi className={`w-${width} h-${height} ${iconColor}`} />;
         case 'esp main module':
-            return <HardDrive className={`w-${width} h-${height} ${iconColor}`} />;
+            return <HardDriveIcon className={`w-${width} h-${height} ${iconColor}`} />;
+        case 'ultrasonic sensor':
+            return <WavesIcon className={`w-${width} h-${height} ${iconColor}`} />;
+        case 'weight sensor':
+            return <WeightTildeIcon className={`w-${width} h-${height} ${iconColor}`} />;
+        case 'motor sensor':
+            return <ConstructionIcon className={`w-${width} h-${height} ${iconColor}`} />;
+        case 'wifi sensor':
+            return <WifiIcon className={`w-${width} h-${height} ${iconColor}`} />;
+        case 'oled display':
+            return <TvMinimalIcon className={`w-${width} h-${height} ${iconColor}`} />;
         default:
-            return <HelpCircle className={`w-${width} h-${height} ${iconColor}`} />;
+            return <HelpCircleIcon className={`w-${width} h-${height} ${iconColor}`} />;
     }
 }
 
@@ -38,7 +40,7 @@ function getStatusIcon(status: string) {
             return <XIcon className="w-8 h-8 text-white" />;
         case 'No connection':
         default:
-            return <HelpCircle className="w-8 h-8 text-white" />;
+            return <HelpCircleIcon className="w-8 h-8 text-white" />;
     }
 }
 
@@ -69,9 +71,9 @@ export function ModuleStatusCard({ sensor }: { sensor: Sensor }) {
                     {sensor.status}
                 </Badge>
             </div>
-            <div className="text-sm text-gray-600 mt-2">
+            <div className="text-xs text-gray-600 mt-2">
                 <span className="text-lg text-black font-medium">Additional info:</span><br />
-                {sensor.message || 'No additional info'}
+                {sensor.espStatus || 'No additional info'}
             </div>
         </div>
     );

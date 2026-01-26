@@ -178,13 +178,13 @@ Before getting started, ensure that you have the following installed:
 #### Pinout
 | Component | GPIO Pin |
 | -- | -- |
-| Camera PWDN | GPIO 38 |
-| Camera VSYNC | GPIO 6 |
-| Camera HREF | GPIO 7 |
-| Camera PCLK | GPIO 13 |
-| Camera XCLK | GPIO 15 |
-| Camera SDA | GPIO 4 |
-| Camera SCL | GPIO 5 |
+| Camera PWDN | GPIO 38 | yellow
+| Camera VSYNC | GPIO 6 | green   
+| Camera HREF | GPIO 7 | blue
+| Camera PCLK | GPIO 13 | black
+| Camera XCLK | GPIO 15 | red 
+| Camera SDA | GPIO 4 | orange 
+| Camera SCL | GPIO 5 | white 
 | Camera D0-D7 | GPIO 11, 9, 8, 10, 12, 18, 17, 16 |
 | Ultrasonic TRIG | GPIO 3 |
 | Ultrasonic ECHO | GPIO 20 |

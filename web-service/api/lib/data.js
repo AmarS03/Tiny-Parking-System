@@ -1,9 +1,6 @@
 // Default number of parking spots
 const defaultParkingSpots = 10;
 
-// SSE subscribers for real-time logs
-const logSubscribers = new Set();
-
 // In-memory store (resets on restart)
 const store = {
     boardStatus: [
@@ -12,15 +9,16 @@ const store = {
         { name: "Weight sensor", status: "No connection", espStatus: "Awaiting system connection" },
         { name: "Motor sensor", status: "No connection", espStatus: "Awaiting system connection" },
         { name: "Wifi sensor", status: "No connection", espStatus: "Awaiting system connection" },
+        { name: "OLED display", status: "No connection", espStatus: "Awaiting system connection" },
     ],
     logs: [],
-    allowedPlates: [],
     spots: Array.from({ length: defaultParkingSpots }, (_, i) => ({
         id: i + 1,
         isOccupied: false,
         occupiedBy: '',
         occupiedAt: null,
     })),
+    allowedPlates: [],
     openingTime: "08:00",
     closingTime: "22:00",
     initializedAt: new Date().toISOString(),
@@ -41,29 +39,24 @@ function addNewLog(type, message, imageUrl = null) {
 
     store.logs.push(logEntry);
     store.lastUpdatedAt = new Date().toISOString();
-    
-    // Notify all SSE subscribers of the new log
-    notifyLogSubscribers(logEntry);
-}
-
-function notifyLogSubscribers(logEntry) {
-    logSubscribers.forEach(res => {
-        res.write(`data: ${JSON.stringify(logEntry)}\n\n`);
-    });
-}
-
-function addLogSubscriber(res) {
-    logSubscribers.add(res);
-    
-    // Return a cleanup function
-    return () => {
-        logSubscribers.delete(res);
-    };
 }
 
 function setBoardStatus(updatedStatus) {
     store.boardStatus = updatedStatus;
     store.lastUpdatedAt = new Date().toISOString();
+}
+
+function setAllowedLicensePlates(plates) {
+    store.allowedPlates = plates;
+    store.lastUpdatedAt = new Date().toISOString();
+}
+
+function isLicensePlateAllowed(licensePlate) {
+    return store.allowedPlates.includes(licensePlate);
+}
+
+function getParkingSpots() {
+    return store.spots;
 }
 
 function noOccupiedSpots() {
@@ -100,19 +93,15 @@ function removeParkedVehicle(licensePlate) {
     }
 }
 
-function isLicensePlateAllowed(licensePlate) {
-    return store.allowedPlates.includes(licensePlate);
-}
-
 module.exports = {
     defaultParkingSpots,
     getStore,
     addNewLog,
     setBoardStatus,
+    setAllowedLicensePlates,
+    isLicensePlateAllowed,
+    getParkingSpots,
     noOccupiedSpots,
     parkVehicle,
     removeParkedVehicle,
-    isLicensePlateAllowed,
-    addLogSubscriber,
-    notifyLogSubscribers,
 };

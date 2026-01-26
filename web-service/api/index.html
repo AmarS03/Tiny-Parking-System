@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tiny Parking System - API</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <style>
         * {
             margin: 0;
@@ -156,6 +157,18 @@
                     </p>
                 </div>
                 
+                <div class="endpoint" data-href="/allowed">
+                    <span class="method put">
+                        PUT
+                    </span>
+                    <code>
+                        /allowed
+                    </code>
+                    <p>
+                        Updates the list of allowed license plates, which can enter the parking lot
+                    </p>
+                </div>
+                
                 <div class="endpoint" data-href="/entry">
                     <span class="method post">
                         POST
@@ -164,7 +177,7 @@
                         /entry
                     </code>
                     <p>
-                        Records a vehicle entering the parking system and returns the entry decision"
+                        Records a vehicle entering the parking system and returns the entry decision
                     </p>
                 </div>
                 

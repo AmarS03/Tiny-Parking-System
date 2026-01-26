@@ -4,8 +4,9 @@
  * Interface used to calibrate and read weight sensor
  * 
  */
-#include "../../main/fsm.h"
 
+#include "../../main/fsm.h"
+#include "../https/https_task.h"
 #include "weight.h"
 
 #include "hx711.h"
@@ -20,8 +21,8 @@
 #define TAG "WEIGHT"
 
 // Weight sensor pin definitions
-#define HX711_DOUT_GPIO  GPIO_NUM_21
-#define HX711_CLK_GPIO   GPIO_NUM_14
+#define HX711_DOUT_GPIO  GPIO_NUM_12
+#define HX711_CLK_GPIO   GPIO_NUM_13
 
 // Detection parameters
 #define NOISE_THRESHOLD          5.0f
@@ -41,6 +42,7 @@ static float offset = 0.0f;  // raw offset
 // Detector state
 static float baseline = 0;
 static float filtered = 0;
+static float last_raw_weight = -1;
 static int detect_count = 0;
 
 // Weight detection enabled flag
@@ -158,7 +160,9 @@ bool weight_detect_vehicle(void)
 {
     float raw_weight = weight_read_grams();
 
-    ESP_LOGI(TAG, "Raw weight: %.1f g", raw_weight);
+    if (raw_weight != last_raw_weight) {
+        ESP_LOGI(TAG, "Raw weight: %.1f g", raw_weight);
+    }
 
     // Baseline drift compensation
     baseline = baseline * 0.99f + raw_weight * 0.01f;
@@ -167,6 +171,11 @@ bool weight_detect_vehicle(void)
 
     // EMA filter
     filtered = filtered * 0.05f + net * 0.95f;
+
+    if (raw_weight != last_raw_weight) {
+        ESP_LOGI(TAG, "Filtered weight: %.1f g", filtered);
+        last_raw_weight = raw_weight;
+    }
 
     // Noise rejection
     if (fabsf(filtered) < NOISE_THRESHOLD) {
@@ -177,9 +186,14 @@ bool weight_detect_vehicle(void)
     // Threshold window
     if (filtered > MIN_CAR_WEIGHT && filtered < MAX_CAR_WEIGHT) {
         detect_count++;
+
         if (detect_count >= DETECT_COUNT_REQUIRED) {
             ESP_LOGI(TAG, "Vehicle detected: %.1f g", filtered);
+
+            float rounded = roundf(filtered * 10.0f) / 10.0f;
+            set_weight_data(&rounded);
             detect_count = 0;
+
             return true;
         }
     } else {
@@ -258,6 +272,7 @@ void weight_task(void *arg) {
             ESP_LOGI(TAG, "Valid weight detected!");
             fsm_handle_event(VALID_WEIGHT_DETECTED);
         }
+        
         // Sleep for 300 ms before next reading
         vTaskDelay(pdMS_TO_TICKS(300));
     }

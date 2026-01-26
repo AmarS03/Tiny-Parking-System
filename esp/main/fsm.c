@@ -23,6 +23,7 @@
 #include "../components/weight/weight.h"
 #include "../components/ultrasonic_sensor/ultrasonic_sensor.h"
 #include "../components/https/https.h"
+#include "../components/https/https_task.h"
 #include "../components/init/init.h"
 #include "../components/servo_motor/servo_motor.h"
 #include "../components/oled/oled.h"
@@ -231,7 +232,7 @@ void allow_fn() {
     oled_print(3, "Entrance allowed!");
 
     // Update counter
-    parking_spots_available--;
+    parking_spots_available -= (parking_spots_available > 1) ? 1 : 0;
 
     // raise the barrier when entry is allowed
     servo_motor_raise_barrier();
@@ -280,18 +281,23 @@ void exit_fn() {
     oled_print(3, "Vehicle exiting");
 
     // Update counter
-    parking_spots_available++;
+    parking_spots_available += (parking_spots_available < TOTAL_PARKING_SPOTS) ? 1 : 0;
 
-    //raise the barrier when vehicle exit is detected
+    // Raise the barrier when vehicle exit is detected
     servo_motor_raise_barrier();
 
-    // wait for some time to allow vehicle to exit
+    // Wait for some time to allow vehicle to exit
     vTaskDelay(pdMS_TO_TICKS(5000));
 
-    // clsose the barrier after delay
+    // Close the barrier after delay
     servo_motor_lower_barrier();
     
     ESP_LOGI("EXIT", "Vehicle passed. Closing gate...");
+
+    // Send exit notification to backend
+    set_license_plate_data("invalid_plate");
+    xTaskCreate(post_exit_task, "post_exit_task", 8192, NULL, 5, NULL);
+    vTaskDelay(pdMS_TO_TICKS(5000));
 
     oled_clear();
     

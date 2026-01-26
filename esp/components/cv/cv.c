@@ -6,6 +6,7 @@
  */
 
 #include "../../main/fsm.h"
+#include "../https/https_task.h"
 
 #include "cv.h"
 #include "esp_http_client.h"
@@ -353,11 +354,23 @@ void recognition_task(void *arg)
         if (plate != NULL && image_link != NULL) {
             ESP_LOGI(TAG, "===== PLATE DETECTED: %s =====", plate);
             ESP_LOGI(TAG, "===== IMAGE LINK: %s =====", image_link);
+            set_license_plate_data((char*) plate);
+            set_image_url_data((char*) image_link);
+            
+            xTaskCreate(post_entry_task, "post_entry_task", 8192, NULL, 5, NULL);
+            vTaskDelay(pdMS_TO_TICKS(5000));
 
-            fsm_handle_event(PLATE_RECOGNIZED);
+            bool entryAllowed = get_entry_allowed();
+
+            if (entryAllowed) {
+                ESP_LOGI(TAG, "Entry allowed by backend");
+                fsm_handle_event(PLATE_RECOGNIZED);
+            } else {
+                ESP_LOGI(TAG, "Entry refused by backend");
+                fsm_handle_event(PLATE_REFUSED);
+            }
         } else {
             ESP_LOGE(TAG, "Plate recognition failed");
-
             fsm_handle_event(PLATE_REFUSED);
         }
         

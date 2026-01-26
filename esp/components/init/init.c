@@ -34,23 +34,23 @@
 #define CAM_RESET -1   //software reset will be performed
 #define CAM_VSYNC GPIO_NUM_6
 #define CAM_HREF GPIO_NUM_7
-#define CAM_PCLK GPIO_NUM_13
+#define CAM_PCLK GPIO_NUM_21
 #define CAM_XCLK GPIO_NUM_15
-#define CAM_SIOD GPIO_NUM_4
-#define CAM_SIOC GPIO_NUM_5
+#define CAM_SIOD GPIO_NUM_40
+#define CAM_SIOC GPIO_NUM_39
 #define CAM_D0 GPIO_NUM_11
-#define CAM_D1 GPIO_NUM_9
-#define CAM_D2 GPIO_NUM_8
+#define CAM_D1 GPIO_NUM_14
+#define CAM_D2 GPIO_NUM_16
 #define CAM_D3 GPIO_NUM_10
-#define CAM_D4 GPIO_NUM_12
-#define CAM_D5 GPIO_NUM_18
+#define CAM_D4 GPIO_NUM_2
+#define CAM_D5 GPIO_NUM_1
 #define CAM_D6 GPIO_NUM_17
-#define CAM_D7 GPIO_NUM_16
+#define CAM_D7 GPIO_NUM_3
 
 #endif
 
 // Servo motor pin definition
-#define SERVO_PWM_GPIO   GPIO_NUM_1
+#define SERVO_PWM_GPIO   GPIO_NUM_18
 #define SERVO_ANGLE_DOWN 0
 #define SERVO_ANGLE_UP   90
 
@@ -73,7 +73,7 @@ void system_init()
     esp_err_t ultrasonic_status = ultrasonic_sensor_init();
     esp_err_t weight_status = weight_sensor_init();
     esp_err_t servo_status = servo_init();
-    esp_err_t oled_status = oled_init(I2C_NUM_0);
+    esp_err_t oled_status = oled_init(I2C_NUM_1);
     
     set_status_variables(camera_status, ultrasonic_status, weight_status, servo_status, wifi_status, oled_status);
 
