@@ -81,7 +81,7 @@ export function SystemLogSection(
                                     {log.imageUrl && (
                                         <img 
                                             src={log.imageUrl} 
-                                            alt="Log preview" 
+                                            alt="Plate capture image" 
                                             className="h-64 object-contain"
                                         />
                                     )}

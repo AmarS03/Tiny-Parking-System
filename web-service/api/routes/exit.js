@@ -21,7 +21,7 @@ router.post("/", (req, res, next) => {
 		// is not found, we simulate the exit by removing a random spot instead
 		// (this is because we don't have another camera sensor for exit detection)
         if (!freed && !noOccupiedSpots()) {
-			const spot = getParkingSpots.find(spot => spot.isOccupied);
+			const spot = getParkingSpots().find(spot => spot.isOccupied);
 			licensePlate = spot.occupiedBy;
 			removeParkedVehicle(spot.occupiedBy);
         }
