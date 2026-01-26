@@ -42,11 +42,14 @@ esp_err_t servo_motor_set_angle(float angle_deg)
 
 esp_err_t servo_motor_raise_barrier(void)
 {
+    ESP_LOGI("SERVO", "Servo raised");
     return servo_motor_set_angle(s_p.angle_up_deg);
 }
 
 esp_err_t servo_motor_lower_barrier(void)
 {
+        ESP_LOGI("SERVO", "Servo lowered");
+
     return servo_motor_set_angle(s_p.angle_down_deg);
 }
 

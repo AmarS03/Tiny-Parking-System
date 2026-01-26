@@ -166,12 +166,12 @@ void idle_fn() {
         enable_weight_detection(true);
         recognition_busy = false;
         char spots_str[20];
-        snprintf(spots_str, sizeof(spots_str), "available: %d", parking_spots_available);
-        oled_print(2, "Parking spots");
-        oled_print(4, spots_str);
+        snprintf(spots_str, sizeof(spots_str), "%d parking spots", parking_spots_available);
+        oled_print(2, spots_str);
+        oled_print(4, "available");
     }
 
-    // Enter low power mode until an interrupt occurs
+    // Enter low power mode
     IDLE_DELAY();
 
     // wait for the ultrasonic sensor to detect vehicle passage
@@ -180,7 +180,6 @@ void idle_fn() {
         vTaskDelay(pdMS_TO_TICKS(500)); // Debounce delay
         fsm_handle_event(EXIT_DETECTED);
     }
-
 }
 
 /**
@@ -200,12 +199,14 @@ void entry_fn() {
         recognition_busy = true;
     }
 
+    vTaskDelay(pdMS_TO_TICKS(2000));
+
     oled_clear();
 }
 
 /**
- * Blinks the LED red and shows a negative
- * message on the LCD
+ * Shows a negative message
+ * on the display
  */
 void refuse_fn() {
     oled_clear();
@@ -222,7 +223,7 @@ void refuse_fn() {
 
 /**
  * Shows a positive message on the
- * LCD, opens the gate bar and waits a signal
+ * display, opens the gate bar and waits a signal
  * from the ultrasonic sensor to close it again
  */
 void allow_fn() {
@@ -269,9 +270,8 @@ void allow_fn() {
 }
 
 /**
- * Opens the gate bar for vehicle exit
- * and waits for a signal from the weight 
- * sensor to close it again
+ * Opens the gate bar for exit
+ * and waits for the vehicle to leave
  */
 void exit_fn() {
     oled_clear();

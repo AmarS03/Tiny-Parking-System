@@ -7,6 +7,7 @@
 
 #include "../../main/fsm.h"
 #include "../https/https_task.h"
+#include "../oled/oled.h"
 #include "weight.h"
 
 #include "hx711.h"
@@ -21,8 +22,8 @@
 #define TAG "WEIGHT"
 
 // Weight sensor pin definitions
-#define HX711_DOUT_GPIO  GPIO_NUM_12
-#define HX711_CLK_GPIO   GPIO_NUM_13
+#define HX711_DOUT_GPIO  GPIO_NUM_21
+#define HX711_CLK_GPIO   GPIO_NUM_14
 
 // Detection parameters
 #define NOISE_THRESHOLD          5.0f
@@ -189,7 +190,11 @@ bool weight_detect_vehicle(void)
 
         if (detect_count >= DETECT_COUNT_REQUIRED) {
             ESP_LOGI(TAG, "Vehicle detected: %.1f g", filtered);
+            char weight_str[32];
+            snprintf(weight_str, sizeof(weight_str), "Valid weight: %.1f g", filtered);
+            oled_print(3, weight_str);
 
+            // Update data to send to the backed
             float rounded = roundf(filtered * 10.0f) / 10.0f;
             set_weight_data(&rounded);
             detect_count = 0;

@@ -16,8 +16,8 @@
 #include <sys/param.h>
 
 // Ultrasonic sensor pin definitions
-#define TRIG_GPIO   GPIO_NUM_4
-#define ECHO_GPIO   GPIO_NUM_5
+#define TRIG_GPIO   GPIO_NUM_3
+#define ECHO_GPIO   GPIO_NUM_20
 
 #define MAX_DISTANCE 50
 #define THRESHOLD_DISTANCE 10
@@ -58,5 +58,5 @@ bool ultrasonic_sensor_detect()
         last_distance = distance;
     }
 
-    return distance > 0 && distance < THRESHOLD_DISTANCE;
+    return (distance > 0 && distance < THRESHOLD_DISTANCE);
 }
