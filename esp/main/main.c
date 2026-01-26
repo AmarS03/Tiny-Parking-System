@@ -48,7 +48,7 @@ void calibration_task(void *arg)
     ESP_ERROR_CHECK(ret);
 
     // Perform weight calibration with a known weight of 1000 grams
-    weight_calibrate(100.0f);
+    weight_calibrate(35.0f);
     vTaskDelete(NULL); // Delete this task after calibration
 }
 #endif

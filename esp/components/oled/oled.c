@@ -8,8 +8,8 @@
 #include "oled.h"
 #include "esp_log.h"
 
-#define OLED_SDA_GPIO GPIO_NUM_9
-#define OLED_SCL_GPIO GPIO_NUM_8
+#define OLED_SDA_GPIO GPIO_NUM_42
+#define OLED_SCL_GPIO GPIO_NUM_41
 
 
 static const char *TAG = "OLED";
