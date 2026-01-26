@@ -10,10 +10,11 @@
 
 #include "ssd1306.h"
 #include "driver/i2c_master.h"
+#include "esp_err.h"
 #include <stdbool.h>
 
 // Initialize the OLED display
-void oled_init(i2c_port_t i2c_port);
+esp_err_t oled_init(i2c_port_t i2c_port);
 
 // Clear the OLED display
 void oled_clear(void);

@@ -9,6 +9,7 @@
 #include "init.h"
 #include "../cv/cv.h"
 #include "../https/https.h"
+#include "../https/https_task.h"
 #include "../ultrasonic_sensor/ultrasonic_sensor.h"
 #include "../weight/weight.h"
 #include "../wifi/wifi.h"
@@ -17,6 +18,7 @@
 
 #include "esp_log.h"
 #include "esp_err.h"
+#include "cJSON.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
@@ -48,19 +50,34 @@
 #endif
 
 // Servo motor pin definition
-#define SERVO_PWM_GPIO   GPIO_NUM_1
-#define SERVO_ANGLE_DOWN 0
+#define SERVO_PWM_GPIO   GPIO_NUM_46
+#define SERVO_ANGLE_DOWN 180
 #define SERVO_ANGLE_UP   90
 
 /**
  * @brief Initializes the overall system components
- * and creates necessary tasks
+ * and creates necessary tasks: also sends the various
+ * statuses to the backend api.
  */
 void system_init()
 {
-    wifi_init();
+    // Initialize WiFi first (for NVS)
+    esp_err_t wifi_status = wifi_init();
 
-    hw_init();
+    esp_err_t camera_status = ESP_OK;
+
+    #ifndef CONFIG_USE_MOCK_CAMERA
+    camera_status = camera_init();
+    #endif
+
+    esp_err_t ultrasonic_status = ultrasonic_sensor_init();
+    esp_err_t weight_status = weight_sensor_init();
+    esp_err_t servo_status = servo_init();
+    esp_err_t oled_status = oled_init(I2C_NUM_1);
+    
+    set_status_variables(camera_status, ultrasonic_status, weight_status, servo_status, wifi_status, oled_status);
+
+    xTaskCreate(put_status_task, "put_status_task", 8192, NULL, 5, NULL);
 
     vTaskDelay(pdMS_TO_TICKS(5000));
 
@@ -69,23 +86,9 @@ void system_init()
     cv_task_creator();
 }
 
-/**
- * @brief Initializes the hardware peripherals
- */
-void hw_init()
-{
-    #ifndef CONFIG_USE_MOCK_CAMERA
-    camera_init();
-    #endif
-    ultrasonic_sensor_init();
-    weight_sensor_init();
-    oled_init(I2C_NUM_0);
-    servo_init();
-}
-
 
 #ifndef CONFIG_USE_MOCK_CAMERA
-void camera_init()
+esp_err_t camera_init()
 {
     const char *TAG = "CAM_INIT";
     ESP_LOGI(TAG, "PSRAM size: %d bytes", esp_psram_get_size());
@@ -123,29 +126,35 @@ void camera_init()
     esp_err_t err = esp_camera_init(&config);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Camera init failed: 0x%x", err);
-        return;
+        return err;
     }
 
-    ESP_LOGI(TAG, "Camera initialized successfully");
+    sensor_t * s = esp_camera_sensor_get();
+    s->set_vflip(s, 1); // flip vertically
+    s->set_brightness(s, 2); // up the brightness just a bit
 
+    ESP_LOGI(TAG, "Camera initialized successfully");
+    return ESP_OK;
 }
 #endif
 
-void weight_sensor_init()
+esp_err_t weight_sensor_init()
 {
     const char *TAG = "WEIGHT_SENSOR_INIT";
+
     esp_err_t err = weight_init();
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Weight sensor init failed: %s", esp_err_to_name(err));
-        return;
+        return err;
     }
 
     ESP_LOGI(TAG, "Weight sensor initialized successfully");
+    return ESP_OK;
 }
 
-void servo_init(void)
+esp_err_t servo_init(void)
 {
-    servo_motor_init(&(servo_motor_params_t){
+    return servo_motor_init(&(servo_motor_params_t){
         .gpio_pwm = SERVO_PWM_GPIO,
         .angle_up_deg = SERVO_ANGLE_UP,
         .angle_down_deg = SERVO_ANGLE_DOWN,
@@ -156,15 +165,17 @@ void servo_init(void)
  * @brief Initializes the WiFi service and
  * connects to the configured access point
  */
-void wifi_init()
+esp_err_t wifi_init()
 {
-    wifi_init_service();
+    esp_err_t res = wifi_init_service();
 
     while (!wifi_is_connected()) {
         ESP_LOGI("WIFI_INIT", "Waiting for WiFi connection...");
-        wifi_init_service();
+        res = wifi_init_service();
         vTaskDelay(pdMS_TO_TICKS(500));
     }
 
     ESP_LOGI("WIFI_INIT", "WiFi connected successfully");
+
+    return res;
 }

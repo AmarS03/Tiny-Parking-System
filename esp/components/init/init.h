@@ -14,16 +14,14 @@
 
 void system_init();
 
-void hw_init();
+esp_err_t camera_init();
 
-void camera_init();
+esp_err_t ultrasonic_sensor_init();
 
-void ultrasonic_sensor_init();
+esp_err_t weight_sensor_init();
 
-void weight_sensor_init();
+esp_err_t wifi_init();
 
-void wifi_init();
-
-void servo_init(void);
+esp_err_t servo_init(void);
 
 #endif /* INIT_H */

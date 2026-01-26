@@ -29,7 +29,7 @@ static ultrasonic_sensor_t ultrasonic = {
 };
 static uint32_t last_distance = -1;
 
-void ultrasonic_sensor_init()
+esp_err_t ultrasonic_sensor_init()
 {
     ESP_LOGI(TAG, "Initializing ultrasonic sensor...");
 
@@ -37,10 +37,11 @@ void ultrasonic_sensor_init()
 
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Ultrasonic sensor init failed: %s", esp_err_to_name(err));
-        return;
+        return err;
     }
 
     ESP_LOGI(TAG, "Ultrasonic sensor initialized successfully");
+    return ESP_OK;
 }
 
 bool ultrasonic_sensor_detect()
@@ -57,5 +58,5 @@ bool ultrasonic_sensor_detect()
         last_distance = distance;
     }
 
-    return distance > 0 && distance < THRESHOLD_DISTANCE;
+    return (distance > 0 && distance < THRESHOLD_DISTANCE);
 }

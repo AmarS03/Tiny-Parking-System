@@ -60,16 +60,18 @@ The project has been developed by the following students:
 | -- | -- | -- |
 | Mirco Stelzer (Group Leader) | mirco.stelzer@studenti.unitn.it | FSM development, weight sensor module, system initialization, OLED module|
 | Leonardo Conforti | leonardo.conforti@studenti.unitn.it | Wokwi Configuration, Computer vision module, Servo module, final draft of the readme |
-| Daniel Casagranda | daniel.casagranda@studenti.unitn.it | circuit engeneering, single sensor testing, code devolopment, 3d model | 
+| Daniel Casagranda | daniel.casagranda@studenti.unitn.it | circuit engineering, single sensor testing, code development, 3d model | 
 | Amar Sidkir | amar.sidkir@studenti.unitn.it | Https modules (esp), state response handling module, Front-end, back-end, web-service deployment, ultrasonic sensor module |
 
-*Every member also contributes actively to the project's strategic decision-making and hands-on validation during team sessions.
+*Every member also contributed actively to the project's strategic decision-making and hands-on validation during team sessions. Many features have been developed either in a 
+pair-programming fashion, or during team meetings.
 
 Our work is based on the knowledge we've gained in the last 3 years, with most of the guidelines learned during teacher's lectures. Some examples include:
 - Code structure
 - Testing and debugging
 - Interoperability
 - Hardware dependent/independent functions
+- Optimization and scalability
 
 ## How it works
 
@@ -381,39 +383,34 @@ Before getting started, ensure that you have the following installed:
 
 ### 2. Setting up the circuit
 #### Hardware Components
-The sensors used for this project are:
-- 1x Esp32S3
-- 1x Ultrasonic sensor (hc-sr04)
-- 1x weight sensors (hx711)
+The sensors and modules used for this project are:
+- 1x ESP32-S3
+- 1x Ultrasonic sensor (HC-SR04)
+- 1x weight sensors (HX711)
 - 1x servo motor (SG90)
-- 1x oled display (ssd1306)
-- 1x camera sensor (Esp32S3 build in)
+- 1x oled display (SSD1306)
+- 1x OV3660 camera
 
 #### Pinout
 | Component | GPIO Pin |
 | -- | -- |
-| Camera PWDN | GPIO 38 |
-| Camera VSYNC | GPIO 6 |
-| Camera HREF | GPIO 7 |
-| Camera PCLK | GPIO 21 |
-| Camera XCLK | GPIO 15 |
-| Camera SIOC (SCL) | GPIO 39 |
-| Camera SIOD (SDA) | GPIO 40 |
-| Camera D0 | GPIO 11 |
-| Camera D1 | GPIO 14 |
-| Camera D2 | GPIO 16 |
-| Camera D3 | GPIO 10 |
-| Camera D4 | GPIO 2 |
-| Camera D5 | GPIO 1 |
-| Camera D6 | GPIO 17 |
-| Camera D7 | GPIO 3 |
-| Ultrasonic TRIG | GPIO 4 |
-| Ultrasonic ECHO | GPIO 5 |
-| Weight Sensor DOUT | GPIO 12 |
-| Weight Sensor CLK | GPIO 13 |
-| Servo Motor PWM | GPIO 18 |
-| OLED SDA | GPIO 9 |
-| OLED SCL | GPIO 8 |
+| Camera PWDN | GPIO 38 | yellow
+| Camera VSYNC | GPIO 6 | green   
+| Camera HREF | GPIO 7 | blue
+| Camera PCLK | GPIO 13 | black
+| Camera XCLK | GPIO 15 | red 
+| Camera SDA | GPIO 4 | orange 
+| Camera SCL | GPIO 5 | white 
+| Camera D0-D7 | GPIO 11, 9, 8, 10, 12, 18, 17, 16 |
+| Ultrasonic TRIG | GPIO 3 |
+| Ultrasonic ECHO | GPIO 20 |
+| Weight Sensor DOUT | GPIO 21 |
+| Weight Sensor CLK | GPIO 14 |
+| Servo Motor PWM | GPIO 46 |
+| OLED SDA | GPIO 42 |
+| OLED SCL | GPIO 41 |
+
+...
 
 
 #### Weight Calibration

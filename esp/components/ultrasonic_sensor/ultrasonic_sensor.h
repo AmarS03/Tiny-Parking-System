@@ -8,9 +8,10 @@
 #ifndef ULTRASONIC_SENSOR_H
 #define ULTRASONIC_SENSOR_H
 
+#include "esp_err.h"
 #include <stdbool.h>
 
-void ultrasonic_sensor_init();
+esp_err_t ultrasonic_sensor_init();
 
 bool ultrasonic_sensor_detect();
 

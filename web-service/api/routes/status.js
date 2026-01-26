@@ -1,36 +1,45 @@
-const express = require('express')
-const router = express.Router()
-const { store, updateStore, getBoardStatus, getSpots, getOpeningHours, getLogs } = require('../lib/data')
+const express = require("express");
+const { addNewLog, getStore, setBoardStatus } = require("../lib/data");
 
-// GET /status - returns current system status
-router.get('/', (req, res, next) => {
-  try {
-    res.json({
-      boardStatus: getBoardStatus(),
-      parkingSpots: getSpots().length,
-      openingTime: getOpeningHours().openingTime,
-      closingTime: getOpeningHours().closingTime,
-    })
-  } catch (err) {
-    next(err)
-  }
-})
+const router = express.Router();
 
-// PUT /status - initialize or update system status
-router.put('/', (req, res, next) => {
-  try {
-    const status = req.body
-    if (!status || typeof status.parkingSpots !== 'number') {
-      const err = new Error('Invalid systemStatus payload')
-      err.status = 400
-      throw err
+// GET /status - returns current board status
+router.get("/", (req, res, next) => {
+    try {
+        res.json(getStore());
+    } catch (err) {
+		addNewLog(
+			"error", 
+			`API error when requesting GET /status: ${err.message}`
+		);
+		
+        next(err);
     }
+});
 
-    updateStore(status)
-    res.json({ message: 'System status updated/initialized successfully' })
-  } catch (err) {
-    next(err)
-  }
-})
+// PUT /status - initialize or update board status
+router.put("/", (req, res, next) => {
+    try {
+        const updatedStatus = req.body;
 
-module.exports = router
+        if (!updatedStatus) {
+            const err = new Error("API error: invalid system status payload");
+            err.status = 400;
+            throw err;
+        } else {
+            setBoardStatus(updatedStatus);
+            addNewLog("info", "ESP system started");
+            res.json({ message: "ESP system started" });
+        }
+    } catch (err) {
+		addNewLog(
+			"error", 
+			`API error when requesting PUT /status: ${err.message}`
+		);
+		
+        next(err);
+    }
+});
+
+module.exports = router;
+

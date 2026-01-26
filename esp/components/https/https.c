@@ -174,7 +174,7 @@ esp_err_t https_get_status(void)
  * @return ESP_OK on success, error code otherwise
  */
 esp_err_t https_put_status(const char *json_payload) {
-    ESP_LOGI(TAG, "performing PUT request to /status with payload: %s", json_payload);
+    ESP_LOGI(TAG, "performing PUT request to /status with payload: \n%s", json_payload);
 
     // Defining the URL for the request
     char url[128];
@@ -194,10 +194,10 @@ esp_err_t https_put_status(const char *json_payload) {
 /**
  * @brief Performs a POST to /entry with a JSON payload. On success this returns the entryId
  * @param json_payload JSON formatted string to send in the request body
- * @return The entryId on success, NULL otherwise
+ * @return True if the entry was allowed, false otherwise
  */
-char* https_post_entry(const char *json_payload) {
-    ESP_LOGI(TAG, "performing POST request to /entry with payload: %s", json_payload);
+bool https_post_entry(const char *json_payload) {
+    ESP_LOGI(TAG, "performing POST request to /entry with payload: \n%s", json_payload);
 
     // Defining the URL for the request
     char url[128];
@@ -211,39 +211,28 @@ char* https_post_entry(const char *json_payload) {
     
     print_response_buffer();
 
-    char *entry_id = NULL;
+    bool is_allowed = false;
 
     // Response handling
     if (err == ESP_OK) {
-        // TO-DO: write a proper JSON parsing logic to extract entryId!
-        entry_id = strdup(response_buffer);
+        cJSON *root = cJSON_Parse(response_buffer);
+
+        if (root == NULL) {
+            ESP_LOGE(TAG, "Failed to parse JSON response");
+            return false;
+        }
+
+        // Look for the "allowed" boolean field
+        cJSON *allowed = cJSON_GetObjectItem(root, "allowed");
+
+        if (cJSON_IsBool(allowed)) {
+            is_allowed = cJSON_IsTrue(allowed);
+        }
+
+        cJSON_Delete(root); // Always free the memory!
     }
     
-    return entry_id;
-}
-
-/**
- * @brief Performs a POST to /entry/{entryID} with a JSON payload, passing the entryId in the URL path
- * @param entry_id The entry ID to include in the URL path
- * @param json_payload JSON formatted string to send in the request body
- * @return ESP_OK on success, error code otherwise
- */
-esp_err_t https_post_entry_id(const char *entry_id, const char *json_payload) {
-    ESP_LOGI(TAG, "performing POST request to /entry/entryId:%s with payload: %s", entry_id, json_payload);
-
-    // Defining the URL for the request
-    char url[128];
-    snprintf(url, sizeof(url), "%sentry/%s", SERVER_URL, entry_id);
-    
-    esp_err_t err = perform_https_request(
-        url,
-        HTTP_METHOD_POST,
-        json_payload
-    );
-    
-    print_response_buffer();
-
-    return err;
+    return is_allowed;
 }
 
 /**
@@ -252,7 +241,7 @@ esp_err_t https_post_entry_id(const char *entry_id, const char *json_payload) {
  * @return ESP_OK on success, error code otherwise
  */
 esp_err_t https_post_exit(const char *json_payload) {
-    ESP_LOGI(TAG, "performing POST request to /exit with payload: %s", json_payload);
+    ESP_LOGI(TAG, "performing POST request to /exit with payload: \n%s", json_payload);
 
     // Defining the URL for the request
     char url[128];
@@ -272,16 +261,5 @@ esp_err_t https_post_exit(const char *json_payload) {
 void https_task(void *arg)
 {
     ESP_LOGI(TAG, "HTTPS task started");
-    
-    // TESTING: per vedere se funziona il modulo HTTPS
-    ESP_LOGI(TAG, "----- HTTPS TESTING -----");
-    esp_err_t err = https_init();
-
-    if (err == ESP_OK) {
-        ESP_LOGI(TAG, "HTTPS GET /status succeeded");
-    } else {
-        ESP_LOGE(TAG, "HTTPS GET /status failed: %s", esp_err_to_name(err));
-    } 
-
     vTaskDelete(NULL);
 }
