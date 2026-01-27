@@ -533,5 +533,6 @@ Tiny Parking System is not just a functional prototype, but a concrete example o
 ## Additional resources
 
 #### Presentation:
+[Link to Pdf Presentation](https://drive.google.com/file/d/1yZuzv3B2_5S6_MoZvG0WTAvF-u4xUFEY/view?usp=sharing)
 
 #### Video:
