@@ -3,7 +3,6 @@
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { ActivityIcon, FileTextIcon, ParkingMeterIcon, ParkingSquareIcon } from 'lucide-react';
 
-
 export function ProjectInfoSection() {
     return (
         <Card className="h-full shadow-md hover:shadow-lg transition-shadow">
@@ -24,7 +23,7 @@ export function ProjectInfoSection() {
                         About this project
                     </h4>
                     <p className="text-sm text-gray-700">
-                        Text here
+                        Tiny Parking System is an automated parking management solution designed for small-sized vehicles (toy cars, RC vehicles, and similar). It creates a realistic parking experience scaled down for educational and prototyping purposes, combining embedded systems, computer vision, and cloud services to autonomously manage vehicle entry, authentication, and parking space allocation.
                     </p>
                 </div>
 
@@ -33,7 +32,7 @@ export function ProjectInfoSection() {
                         What it does and how it works
                     </h4>
                     <p className="text-sm text-gray-700">
-                        Text here
+                        The system operates through a sophisticated Finite State Machine that orchestrates multiple sensors and services. When a vehicle approaches, a weight sensor first discriminates between authorized cars and other objects (pedestrians, trucks). Upon detection, a camera captures the license plate, which is processed through a cloud-based computer vision service to verify against an allowed plates database. If authorized and parking spaces are available, the barrier opens to grant access. Throughout the process, the system maintains real-time synchronization with a web dashboard and cloud API for monitoring and control.
                     </p>
                 </div>
 
@@ -48,7 +47,7 @@ export function ProjectInfoSection() {
                                 Project info
                             </h4>
                             <p className="text-sm text-gray-700">
-                                You are here :)
+                                You are currently here: This section provides an overview of the project, including its purpose, architecture, and links to all documentation and resources including the presentation and demonstration video.
                             </p>
                         </div>
 
@@ -58,7 +57,7 @@ export function ProjectInfoSection() {
                                 System status
                             </h4>
                             <p className="text-sm text-gray-700">
-                                Text here
+                                Real-time monitoring of all active hardware modules and their operational status. Displays the status of the weight sensor, ultrasonic sensor, camera, servo motor, OLED display, and WiFi connectivity. Shows current error codes and diagnostic information for each module, updated continuously as the system operates and initializes.
                             </p>
                         </div>
 
@@ -68,7 +67,7 @@ export function ProjectInfoSection() {
                                 System log
                             </h4>
                             <p className="text-sm text-gray-700">
-                                Text here
+                                Comprehensive archive of all recorded system events, warnings, and activities presented in chronological order. Includes vehicle entry and exit attempts, license plate recognition results with captured images, authorization decisions, and system initialization events. Fully searchable and sortable for easy investigation of historical data.
                             </p>
                         </div>
 
@@ -78,22 +77,24 @@ export function ProjectInfoSection() {
                                 Parking simulation
                             </h4>
                             <p className="text-sm text-gray-700">
-                                Text here
+                                Interactive 3D representation of the parking infrastructure with a real-time grid view showing occupied and available spots. Displays license plates of parked vehicles with animated transitions when vehicles enter or exit. Includes management controls to add or remove allowed license plates from the system whitelist directly from the dashboard.
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <div className="space-y-1 pt-6 border-t">
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                        <strong>Course:</strong> Embedded Software for the Internet of Things
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                        <strong>Taught by:</strong> prof. Kasim Sinan Yildirim, during the 2025/2026 academic year
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                        <strong>Team members:</strong> Mirco Stelzer, Leonardo Conforti, Daniel Casagranda and Amar Sidkir
-                    </p>
+                <div className="space-y-3 pt-6 border-t">
+                    <div className="space-y-1">
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                            <strong>Course:</strong> Embedded Software for the Internet of Things
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                            <strong>Taught by:</strong> prof. Kasim Sinan Yildirim, during the 2025/2026 academic year
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                            <strong>Team members:</strong> Mirco Stelzer, Leonardo Conforti, Daniel Casagranda and Amar Sidkir
+                        </p>
+                    </div>
                 </div>
             </CardContent>
         </Card>

@@ -4,7 +4,13 @@ This repository contains all of the code (and more) about our project for the Em
 
 Our project, Tiny Parking System, wants to simulate a realistic parking system scaled to small sized vehicles (like toy cars or very small RC vehicles) by creating an automated environment for parking management, which can be managed and controlled autonomously thanks to the complex interconnected environment made up by the various sensors, modules and web services.
 
+### Website links
+https://tinyparkingsystem.vercel.app/
+
+https://tinyparkingsystem-api.vercel.app/ (API)
+
 ### Table of Contents
+- [Website links](#website-links)
 - [About the project](#about-the-project)
 - [How it works](#how-it-works)
   - [State diagram](#state-diagram)
@@ -21,6 +27,7 @@ Our project, Tiny Parking System, wants to simulate a realistic parking system s
     - [Dependencies](#dependencies)
   - [API Endpoints](#api-endpoints)
     - [System Status](#system-status)
+    - [Allowed Plates](#allowed-plates)
     - [Vehicle Entry](#vehicle-entry)
     - [Vehicle Exit](#vehicle-exit)
   - [Data Structure](#data-structure)
@@ -61,7 +68,7 @@ The project has been developed by the following students:
 | Mirco Stelzer (Group Leader) | mirco.stelzer@studenti.unitn.it | FSM development, weight sensor module, system initialization, OLED module|
 | Leonardo Conforti | leonardo.conforti@studenti.unitn.it | Wokwi Configuration, Computer vision module, Servo module, final draft of the readme |
 | Daniel Casagranda | daniel.casagranda@studenti.unitn.it | circuit engineering, single sensor testing, code development, 3d model | 
-| Amar Sidkir | amar.sidkir@studenti.unitn.it | Https modules (esp), state response handling module, Front-end, back-end, web-service deployment, ultrasonic sensor module |
+| Amar Sidkir | amar.sidkir@studenti.unitn.it | HTTPs modules (esp), ultrasonic sensor module, state response handling module, front-end and back-end web-service |
 
 *Every member also contributed actively to the project's strategic decision-making and hands-on validation during team sessions. Many features have been developed either in a 
 pair-programming fashion, or during team meetings.
@@ -315,6 +322,8 @@ The project utilizes the following third-party libraries:
 #### System Status
 - **GET /status** → Returns current system status including board status, logs, allowed plates, and parking spots
 - **PUT /status** → Updates or initializes the system status with new board state
+
+#### Allowed Plates
 - **PUT /allowed** → Updates the list of allowed license plates, which can enter the parking lots 
 
 #### Vehicle Entry
@@ -533,6 +542,9 @@ Tiny Parking System is not just a functional prototype, but a concrete example o
 ## Additional resources
 
 #### Presentation:
-[Link to Pdf Presentation](https://drive.google.com/file/d/1yZuzv3B2_5S6_MoZvG0WTAvF-u4xUFEY/view?usp=sharing)
+[Link to PDF Presentation](https://drive.google.com/file/d/1yZuzv3B2_5S6_MoZvG0WTAvF-u4xUFEY/view?usp=sharing)
 
 #### Video:
+[Link to YouTube video](https://youtu.be/vJGOk5S4GyM)
+
+[Link to Drive video](https://drive.google.com/file/d/1OX4_Q_e3HnTz52xjsOnGZP8HDbGlXbgp/view?usp=sharing)
